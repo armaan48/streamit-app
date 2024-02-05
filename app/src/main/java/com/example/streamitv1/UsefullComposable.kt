@@ -101,7 +101,7 @@ fun VideoPreview(
                         )
                         .background(MaterialTheme.colorScheme.primary)
                         .clickable {
-                            navController.navigate("VideoPlayer")
+                            navController.navigate("VideoPlayer/${video.str}")
                         },
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -532,8 +532,8 @@ fun SideOptions(
                     image = R.drawable.homepage_icon,
                     text = "Homepage",
                     onclick = {
+                        vM.mSocket.emit("give-videos" ,{});
                         if(!vM.isOffsetEnabled.value) {
-                            Log.d("debug my-app" , "HOMEPAGE");
 
                             vM.isOffsetEnabled.value = !vM.isOffsetEnabled.value
                             navController.navigate("HomePage")
@@ -544,9 +544,9 @@ fun SideOptions(
                     image = R.drawable.follow_icon,
                     text = "Following",
                     onclick = {
+                        vM.mSocket.emit("give-videos" ,{});
 
                         if(!vM.isOffsetEnabled.value){
-                            Log.d("debug my-app" , "Following");
 
                             vM.isOffsetEnabled.value = !vM.isOffsetEnabled.value
                             navController.navigate("Following")
@@ -570,6 +570,8 @@ fun SideOptions(
                     image = R.drawable.search_icon,
                     text = "Search",
                     onclick = {
+                        vM.mSocket.emit("give-videos" ,{});
+
                         if(!vM.isOffsetEnabled.value){
                             vM.isOffsetEnabled.value = !vM.isOffsetEnabled.value
                             navController.navigate("Search")
@@ -581,6 +583,7 @@ fun SideOptions(
                 image = R.drawable.logout_icon,
                 text = "Log out",
                 onclick = {
+                    vM.reset()
                     if(!vM.isOffsetEnabled.value){
                         vM.isOffsetEnabled.value = !vM.isOffsetEnabled.value
                         navController.navigate("LoginSection")

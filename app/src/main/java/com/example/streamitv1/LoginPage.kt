@@ -32,12 +32,7 @@ fun LoginPage(
     vM: ViewModel
 ) {
 
-    fun reset(){
-        vM.userName.value=""
-        vM.password.value=""
-        vM.confirmPassword.value=""
-        vM.errorType.value=""
-    }
+
 
     Column(
         modifier = Modifier
@@ -153,7 +148,7 @@ fun LoginPage(
                 Text(
                     modifier = Modifier
                         .clickable{
-                            reset()
+                            vM.reset()
                             navController.navigate("Signup") },
                     text = "Sign up",
                     color = MaterialTheme.colorScheme.secondary,

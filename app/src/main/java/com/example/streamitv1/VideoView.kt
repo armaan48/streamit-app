@@ -1,5 +1,6 @@
 package com.example.streamitv1
 
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.compose.animation.AnimatedVisibility
@@ -67,8 +68,6 @@ fun VideoView(
     video: VideoDetail
 ) {
     val context = LocalContext.current
-
-
     val exoPlayer: ExoPlayer = ExoPlayer.Builder(context).build().apply {
         setMediaItem(
             MediaItem.fromUri(

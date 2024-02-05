@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import org.json.JSONArray
+import org.json.JSONObject
 
 class ViewModel() :ViewModel(){
     private val _userName =  mutableStateOf("")
@@ -157,6 +158,7 @@ class ViewModel() :ViewModel(){
         for (i in 0 until newVideoList.length()){
             val video = newVideoList.getJSONObject(i)
             var videoFormatted = VideoDetail(
+                video.toString(),
                 video.getString("id"),
                 UserDetail(
                     video.getString("author"),
@@ -172,6 +174,12 @@ class ViewModel() :ViewModel(){
             videoList.add(videoFormatted)
         }
 
+    }
+    fun reset(){
+        userName.value=""
+        password.value=""
+        confirmPassword.value=""
+        errorType.value=""
     }
     init{
 

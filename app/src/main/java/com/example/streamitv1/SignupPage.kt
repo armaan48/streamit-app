@@ -34,12 +34,7 @@ fun SignupPage(
     vM: ViewModel
 ) {
 
-    fun reset(){
-        vM.userName.value=""
-        vM.password.value=""
-        vM.confirmPassword.value=""
-        vM.errorType.value=""
-    }
+
 
     Column(
         modifier = Modifier
@@ -51,7 +46,7 @@ fun SignupPage(
         Spacer(modifier = Modifier.height(80.dp))
         LoginNSignupIconButton(
             reset = {
-                reset()
+                vM.reset()
                 navController.popBackStack()
             }
         )

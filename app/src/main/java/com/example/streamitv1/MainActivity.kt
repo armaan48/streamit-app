@@ -12,13 +12,14 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.streamitv1.ui.theme.StreamitTheme
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import org.json.JSONObject
 
 @RequiresApi(Build.VERSION_CODES.O)
 class MainActivity : ComponentActivity() {
@@ -71,12 +72,38 @@ class MainActivity : ComponentActivity() {
                                 vM =  vM
                             )
                         }
-                        composable("VideoPlayer") {
-                            VideoView(
-                                navController = navController,
-                                vM = vM,
-                                video = vM.videoList[0]
+                        composable(
+                            "VideoPlayer/{video}",
+                            arguments = listOf(
+                                navArgument( name="video"){
+                                    type = NavType.StringType
+                                }
                             )
+                        ) {
+                            val videoJson  = it.arguments?.getString("video")
+                            if (videoJson!=null){
+                                val video = JSONObject(videoJson)
+                                VideoView(
+
+                                    navController = navController,
+                                    vM = vM,
+                                    video = VideoDetail(
+                                        video.toString(),
+                                        video.getString("id"),
+                                        UserDetail(
+                                            video.getString("author"),
+                                            "https://storage.googleapis.com/user-streamit/${video.getString("author")}.png"
+                                        ),
+                                        video.getString("title"),
+                                        video.getString("tags"),
+                                        video.getString("description"),
+                                        "https://storage.googleapis.com/video-streamit/${video.getString("id")}/output/manifest.m3u8",
+                                        "https://storage.googleapis.com/video-streamit/${video.getString("id")}/${video.getString("id")}.png",
+                                    )
+                                )
+                            }
+
+
                         }
                         navigation(startDestination = "UploadMain", route = "Upload"){
                             composable("UploadMain") {
