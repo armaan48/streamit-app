@@ -172,7 +172,7 @@ fun VideoView(
                             horizontalArrangement = Arrangement.End
                         ) {
                             Text(
-                                text = "1K Views",
+                                text = "1K Views ",
                                 fontFamily = rosarioFamily,
                                 fontWeight = FontWeight.Light,
                                 color = MaterialTheme.colorScheme.secondary,
