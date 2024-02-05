@@ -91,7 +91,7 @@ fun FollowingListView(
                 items(8){
                     FollowerList(
                         id = R.drawable.joji_pp,
-                        name = "Jo ji"
+                        name = "Joji"
                     )
                 }
             }
