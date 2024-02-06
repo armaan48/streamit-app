@@ -106,7 +106,11 @@ fun VideoPreview(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ){
-                    AsyncImage(model = video.videoThumbnail, contentDescription = video.title)
+                    AsyncImage(
+                        model = video.videoThumbnail,
+                        modifier = Modifier.fillMaxSize(),
+                        contentDescription = video.title
+                    )
                 }
             }
         }

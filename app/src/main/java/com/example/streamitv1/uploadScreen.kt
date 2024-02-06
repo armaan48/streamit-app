@@ -84,8 +84,15 @@ fun UploadScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(Modifier.height(40.dp))
+            var info = "Upload";
+            if (vM.videoPercentageUploaded.value > 0){
+                info = "Uploading ${vM.videoPercentageUploaded.value}%"
+            }else if (vM.videoPercentageUploaded.value.toInt() ==100){
+                info = "Video Uploaded"
+            }
             TopBar(
-                text = "Upload",
+
+                text = info,
                 vM = vM
 
             )
