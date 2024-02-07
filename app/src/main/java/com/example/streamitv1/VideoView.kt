@@ -29,6 +29,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -352,15 +354,20 @@ fun VideoView(
                 color = MaterialTheme.colorScheme.tertiary
             )
             Spacer(modifier = Modifier.height(8.dp))
-            LazyColumn(
+            LazyVerticalGrid(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1F),
                 verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalArrangement = Arrangement.Center,
+                columns = GridCells.Adaptive(minSize = 370.dp)
             ) {
-                items(6){
-                    VideoPreview(navController , vM = vM , vM.videoList[it])
+                items(vM.videoList.size){
+                    VideoPreview(
+                        navController = navController,
+                        vM = vM,
+                        vM.videoList[it],
+                    )
                 }
             }
         }

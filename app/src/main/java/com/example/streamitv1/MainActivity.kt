@@ -1,16 +1,10 @@
 package com.example.streamitv1
 
-import android.content.Context
 import android.os.Build
 import android.os.Bundle
-import android.provider.MediaStore.Video
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -38,7 +32,7 @@ class MainActivity : ComponentActivity() {
             StreamitTheme {
                 NavHost(
                     navController = navController,
-                    startDestination = "Login" ,
+                    startDestination = "Main" ,
                     route = "LoginSection"
                 ) {
                     composable(

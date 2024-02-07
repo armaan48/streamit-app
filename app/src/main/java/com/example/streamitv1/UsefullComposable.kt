@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -517,7 +518,7 @@ fun SideOptions(
                 )
             }
         }
-        Spacer(modifier = Modifier.height(35.dp))
+        Spacer(modifier = Modifier.height(30.dp))
         Column(
             modifier = Modifier
                 .fillMaxHeight()
@@ -525,64 +526,73 @@ fun SideOptions(
             verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.Start
         ){
-            Column(
+            LazyColumn(
                 modifier = Modifier
                     .weight(1F)
                     .width(((5 * w) / 8)),
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.Start
             ){
-                SideBarOption(
-                    image = R.drawable.homepage_icon,
-                    text = "Homepage",
-                    onclick = {
-                        vM.mSocket.emit("give-videos" ,{});
-                        if(!vM.isOffsetEnabled.value) {
+                item{
+                    SideBarOption(
+                        image = R.drawable.homepage_icon,
+                        text = "Homepage",
+                        onclick = {
+                            vM.mSocket.emit("give-videos" ,{});
+                            if(!vM.isOffsetEnabled.value) {
 
-                            vM.isOffsetEnabled.value = !vM.isOffsetEnabled.value
-                            navController.navigate("HomePage")
+                                vM.isOffsetEnabled.value = !vM.isOffsetEnabled.value
+                                navController.navigate("HomePage")
+                            }
                         }
-                    }
-                )
-                SideBarOption(
-                    image = R.drawable.follow_icon,
-                    text = "Following",
-                    onclick = {
-                        vM.mSocket.emit("give-videos" ,{});
+                    )
+                }
+                item{
+                    SideBarOption(
+                        image = R.drawable.follow_icon,
+                        text = "Following",
+                        onclick = {
+                            vM.mSocket.emit("give-videos" ,{});
 
-                        if(!vM.isOffsetEnabled.value){
+                            if(!vM.isOffsetEnabled.value){
 
-                            vM.isOffsetEnabled.value = !vM.isOffsetEnabled.value
-                            navController.navigate("Following")
+                                vM.isOffsetEnabled.value = !vM.isOffsetEnabled.value
+                                navController.navigate("Following")
+                            }
                         }
-                    }
-                )
-                SideBarOption(
-                    image = R.drawable.upload_icon,
-                    text = "Upload",
-                    onclick = {
+                    )
+                }
+                item{
+                    SideBarOption(
+                        image = R.drawable.upload_icon,
+                        text = "Upload",
+                        onclick = {
 
-                        if(!vM.isOffsetEnabled.value){
-                            Log.d("debug my-app" , "Upload");
+                            if(!vM.isOffsetEnabled.value){
+                                Log.d("debug my-app" , "Upload");
 
-                            vM.isOffsetEnabled.value = !vM.isOffsetEnabled.value
-                            navController.navigate("Upload")
+                                vM.isOffsetEnabled.value = !vM.isOffsetEnabled.value
+                                navController.navigate("Upload")
+                            }
                         }
-                    }
-                )
-                SideBarOption(
-                    image = R.drawable.search_icon,
-                    text = "Search",
-                    onclick = {
-                        vM.mSocket.emit("give-videos" ,{});
+                    )
+                }
+                item{
+                    SideBarOption(
+                        image = R.drawable.search_icon,
+                        text = "Search",
+                        onclick = {
+                            vM.mSocket.emit("give-videos" ,{});
 
-                        if(!vM.isOffsetEnabled.value){
-                            vM.isOffsetEnabled.value = !vM.isOffsetEnabled.value
-                            navController.navigate("Search")
+                            if(!vM.isOffsetEnabled.value){
+                                vM.isOffsetEnabled.value = !vM.isOffsetEnabled.value
+                                navController.navigate("Search")
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
+            Spacer(modifier = Modifier.height(35.dp))
             SideBarOption(
                 image = R.drawable.logout_icon,
                 text = "Log out",

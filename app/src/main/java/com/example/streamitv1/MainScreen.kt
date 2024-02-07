@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -66,12 +68,13 @@ fun MainScreen(
                 thickness = 1.dp,
                 color = MaterialTheme.colorScheme.tertiary
             )
-            LazyColumn(
+            LazyVerticalGrid(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1F),
                 verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalArrangement = Arrangement.Center,
+                columns = GridCells.Adaptive(minSize = 370.dp)
             ) {
                 items(vM.videoList.size){
                     VideoPreview(

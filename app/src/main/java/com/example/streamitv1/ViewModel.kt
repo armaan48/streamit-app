@@ -10,9 +10,8 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import org.json.JSONArray
-import org.json.JSONObject
 
-class ViewModel() :ViewModel(){
+class ViewModel :ViewModel(){
     private val _userName =  mutableStateOf("")
     private val _password = mutableStateOf("")
     private val _confirmPassword = mutableStateOf("")
@@ -22,15 +21,12 @@ class ViewModel() :ViewModel(){
     private val _encryptedPassword = mutableStateOf("")
 
 
-    private val _isOffsetEnabled = mutableStateOf(false)
-
-    private val _mainPage = mutableStateOf("Following")
+    private val _isOffsetEnabled = mutableStateOf(true)
 
     private val _title = mutableStateOf("")
     private val _description = mutableStateOf("")
     private val _tags = mutableStateOf("")
     private val _uploadType = mutableStateOf("")
-
 
     private val _videoSize = mutableLongStateOf(0L)
     private val _videoTotalChunks = mutableLongStateOf(0)
@@ -51,24 +47,24 @@ class ViewModel() :ViewModel(){
     val videoSize: MutableLongState =  _videoSize
     val videoTotalChunks: MutableLongState = _videoTotalChunks
     val videoChunkSent: MutableLongState = _videoChunkSent
-    val videoChunkSize: Long = 1024*1024*4
+    val videoChunkSize: Long = 1024*1024*1
     val videoPercentageUploaded: MutableDoubleState = _videoPercentageUploaded
     val videoChunkList = mutableStateListOf<String>()
 
     val thumbnailSize: MutableLongState =  _thumbnailSize
     val thumbnailTotalChunks: MutableLongState = _thumbnailTotalChunks
     val thumbnailChunkSent: MutableLongState = _thumbnailChunkSent
-    val thumbnailChunkSize: Long = 1024*1024*4
-    val thumbnailPercentageUploaded: MutableDoubleState = _thumbnailPercentageUploaded
+    val thumbnailChunkSize: Long = 1024*1024*1
+    private val thumbnailPercentageUploaded: MutableDoubleState = _thumbnailPercentageUploaded
     val thumbnailChunkList = mutableStateListOf<String>()
 
 
     val dpSize: MutableLongState =  _dpSize
     val dpTotalChunks: MutableLongState = _dpTotalChunks
     val dpChunkSent: MutableLongState = _dpChunkSent
-    val dpChunkSize: Long = 1024*1024*4
-    val dpPercentageUploaded: MutableDoubleState = _dpPercentageUploaded
-    val dpChunkList = mutableStateListOf<String>()
+    val dpChunkSize: Long = 1024*1024*1
+    private val dpPercentageUploaded: MutableDoubleState = _dpPercentageUploaded
+    private val dpChunkList = mutableStateListOf<String>()
 
 
 
@@ -76,8 +72,6 @@ class ViewModel() :ViewModel(){
     val videoList = mutableStateListOf<VideoDetail>()
 
     private val _searchInput = mutableStateOf("")
-
-    private val _followState = mutableStateOf("List")
 
     private val _channelName = mutableStateOf("")
     private val _channelDescription = mutableStateOf("")
@@ -107,14 +101,11 @@ class ViewModel() :ViewModel(){
 
 
     fun addChunk(type:String, data: String ){
-        if (type=="video"){
-            videoChunkList.add(data)
-        }else if (type=="dp"){
-            dpChunkList.add(data)
-        }else if (type=="thumbnail"){
-            thumbnailChunkList.add(data)
+        when(type){
+            "video" -> { videoChunkList.add(data) }
+            "dp" -> { dpChunkList.add(data) }
+            "thumbnail" -> { thumbnailChunkList.add(data) }
         }
-
     }
 
     private val videoChunkHandler: (Array<Any>) -> Unit = {
@@ -154,10 +145,10 @@ class ViewModel() :ViewModel(){
     private val videoListHandler: (Array<Any>) -> Unit = {
         println("I GOT THE VIDEOS ${it[0].toString()}")
         videoList.clear()
-        var newVideoList = it[0] as JSONArray
+        val newVideoList = it[0] as JSONArray
         for (i in 0 until newVideoList.length()){
             val video = newVideoList.getJSONObject(i)
-            var videoFormatted = VideoDetail(
+            val videoFormatted = VideoDetail(
                 video.toString(),
                 video.getString("id"),
                 UserDetail(
