@@ -32,7 +32,7 @@ class MainActivity : ComponentActivity() {
             StreamitTheme {
                 NavHost(
                     navController = navController,
-                    startDestination = "Main" ,
+                    startDestination = "Login" ,
                     route = "LoginSection"
                 ) {
                     composable(
