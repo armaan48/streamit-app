@@ -1,6 +1,6 @@
 package com.example.streamitv1
 
-import android.util.Log
+import android.content.res.Configuration
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.compose.animation.AnimatedVisibility
@@ -28,7 +28,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
@@ -42,8 +41,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -88,38 +85,12 @@ fun VideoView(
         label = ""
     )
 
-    SideOptions(
-        navController = navController,
-        vM = vM
-    )
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Transparent)
-            .offset(x = offsetX, y = 0.dp),
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.primary),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Spacer(Modifier.height(40.dp))
-            TopBar(
-                text = "Stream it",
-                vM = vM
-            )
-            Divider(
-                modifier = Modifier.fillMaxWidth(0.95F),
-                thickness = 1.dp,
-                color = MaterialTheme.colorScheme.tertiary
-            )
+    val configuration = LocalConfiguration.current
+    when (configuration.orientation) {
+        Configuration.ORIENTATION_LANDSCAPE -> {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(16F / 9F)
+                    .fillMaxSize()
             ) {
                 DisposableEffect(key1 = Unit) { onDispose { exoPlayer.release() } }
                 AndroidView(
@@ -134,248 +105,298 @@ fun VideoView(
                     }
                 )
             }
-            Row(
+        }
+        else -> {
+            SideOptions(
+                navController = navController,
+                vM = vM
+            )
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(170.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start
+                    .fillMaxSize()
+                    .background(Color.Transparent)
+                    .offset(x = offsetX, y = 0.dp),
+                verticalArrangement = Arrangement.Center,
             ) {
-                Spacer(modifier = Modifier.width(20.dp))
                 Column(
                     modifier = Modifier
-                        .fillMaxHeight()
-                        .weight(1F),
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.primary),
                     verticalArrangement = Arrangement.Top,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1F),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start
-                    ) {
-                        Text(
-                            modifier = Modifier
-                                .weight(1F),
-                            text = video.title,
-                            fontFamily = rosarioFamily,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.secondary,
-                            fontSize = 18.sp
-                        )
-                        Row(
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .weight(1F),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.End
-                        ) {
-                            Text(
-                                text = "1K Views ",
-                                fontFamily = rosarioFamily,
-                                fontWeight = FontWeight.Light,
-                                color = MaterialTheme.colorScheme.secondary,
-                                fontSize = 16.sp
-                            )
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text(
-                                modifier = Modifier
-                                    .clickable {
-                                        vM.descriptionExtended.value = !vM.descriptionExtended.value
-                                               },
-                                text = "...more",
-                                fontFamily = rosarioFamily,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.secondary,
-                                fontSize = 17.sp
-                            )
-                        }
-                    }
-                    AnimatedVisibility(
-                        vM.descriptionExtended.value,
-                        enter = expandVertically(animationSpec = tween(durationMillis = 200), expandFrom = Alignment.Top) { 60 } + fadeIn(),
-                        exit = shrinkVertically(animationSpec = tween(durationMillis = 200), shrinkTowards = Alignment.Bottom) { 0 } + fadeOut()
-                    ){
-                        Column(
-                            modifier = Modifier
-                                .height(73.dp)
-                                .fillMaxWidth(),
-                            verticalArrangement = Arrangement.Bottom,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ){
-                            Column(
-                                modifier = Modifier
-                                    .animateContentSize()
-                                    .height(60.dp)
-                                    .fillMaxWidth(),
-                                verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(video.description)
-                            }
-                        }
-                    }
-                    Row(
-                        modifier = Modifier
-                            .weight(1F)
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .weight(1F),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Start
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .aspectRatio(1F)
-                                    .clickable {
-                                        navController.navigate("ProfilePage")
-                                    },
-                                verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ){
-                                    Box(
-                                        modifier = Modifier
-                                            .height(40.dp)
-                                            .width(40.dp)
-                                            .shadow(
-                                                color = MaterialTheme.colorScheme.onTertiary,
-                                                borderRadius = 32.dp,
-                                                blurRadius = 3.dp,
-                                                offsetY = 5.dp,
-                                                offsetX = 0.dp,
-                                                spread = 1.dp,
-                                                )
-                                    )
-                                    AsyncImage(
-                                        model = video.author.thumbnailURL,
-                                        modifier = Modifier
-                                            .size(39.dp)
-                                            .clip(CircleShape),
-                                        placeholder = painterResource(id = R.drawable.user_icon),
-                                        error = painterResource(id = R.drawable.user_icon),
-                                        contentDescription = "User Dp",
-                                    )
-                                }
-                            }
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text(
-                                text = video.author.username,
-                                fontFamily = rosarioFamily,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.secondary,
-                                fontSize = 17.sp
-                            )
-                        }
-                        Column(
-                            modifier = Modifier
-                                .fillMaxHeight(0.6F)
-                                .width(150.dp),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            VideoViewButton(
-                                image = -1,
-                                text = "Subscribe",
-                                onclick = {
-
-                                }
-                            )
-                        }
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1F),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxHeight(0.6F)
-                                .weight(1F),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            VideoViewButton(
-                                image = R.drawable.like_icon,
-                                text = "like",
-                                onclick = {
-                                }
-                            )
-                        }
-                        Column(
-                            modifier = Modifier
-                                .fillMaxHeight(0.6F)
-                                .weight(1F),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            VideoViewButton(
-                                image = R.drawable.share_icon,
-                                text = "share",
-                                onclick = {
-                                }
-                            )
-                        }
-                        Column(
-                            modifier = Modifier
-                                .fillMaxHeight(0.6F)
-                                .weight(1F),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            VideoViewButton(
-                                image = R.drawable.save_icon,
-                                text = "save",
-                                onclick = {
-                                }
-                            )
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.width(20.dp))
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Divider(
-                modifier = Modifier.fillMaxWidth(0.95F),
-                thickness = 1.dp,
-                color = MaterialTheme.colorScheme.tertiary
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            LazyVerticalGrid(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1F),
-                verticalArrangement = Arrangement.Top,
-                horizontalArrangement = Arrangement.Center,
-                columns = GridCells.Adaptive(minSize = 370.dp)
-            ) {
-                items(vM.videoList.size){
-                    VideoPreview(
-                        navController = navController,
-                        vM = vM,
-                        vM.videoList[it],
+                    Spacer(Modifier.height(40.dp))
+                    TopBar(
+                        text = "Stream it",
+                        vM = vM
                     )
+                    Divider(
+                        modifier = Modifier.fillMaxWidth(0.95F),
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.tertiary
+                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(16F / 9F)
+                    ) {
+                        DisposableEffect(key1 = Unit) { onDispose { exoPlayer.release() } }
+                        AndroidView(
+                            factory = {
+                                PlayerView(context).apply {
+                                    player = exoPlayer
+                                    layoutParams = FrameLayout.LayoutParams(
+                                        ViewGroup.LayoutParams.MATCH_PARENT,
+                                        ViewGroup.LayoutParams.MATCH_PARENT
+                                    )
+                                }
+                            }
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(170.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        Spacer(modifier = Modifier.width(20.dp))
+                        Column(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .weight(1F),
+                            verticalArrangement = Arrangement.Top,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .weight(1F),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Start
+                            ) {
+                                Text(
+                                    modifier = Modifier
+                                        .weight(1F),
+                                    text = video.title,
+                                    fontFamily = rosarioFamily,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.secondary,
+                                    fontSize = 18.sp
+                                )
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .weight(1F),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.End
+                                ) {
+                                    Text(
+                                        text = "1K Views ",
+                                        fontFamily = rosarioFamily,
+                                        fontWeight = FontWeight.Light,
+                                        color = MaterialTheme.colorScheme.secondary,
+                                        fontSize = 16.sp
+                                    )
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                    Text(
+                                        modifier = Modifier
+                                            .clickable {
+                                                vM.descriptionExtended.value = !vM.descriptionExtended.value
+                                            },
+                                        text = "...more",
+                                        fontFamily = rosarioFamily,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = MaterialTheme.colorScheme.secondary,
+                                        fontSize = 17.sp
+                                    )
+                                }
+                            }
+                            AnimatedVisibility(
+                                vM.descriptionExtended.value,
+                                enter = expandVertically(animationSpec = tween(durationMillis = 200), expandFrom = Alignment.Top) { 60 } + fadeIn(),
+                                exit = shrinkVertically(animationSpec = tween(durationMillis = 200), shrinkTowards = Alignment.Bottom) { 0 } + fadeOut()
+                            ){
+                                Column(
+                                    modifier = Modifier
+                                        .height(73.dp)
+                                        .fillMaxWidth(),
+                                    verticalArrangement = Arrangement.Bottom,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ){
+                                    Column(
+                                        modifier = Modifier
+                                            .animateContentSize()
+                                            .height(60.dp)
+                                            .fillMaxWidth(),
+                                        verticalArrangement = Arrangement.Center,
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Text(video.description)
+                                    }
+                                }
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .weight(1F)
+                                    .fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Start
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .weight(1F),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Start
+                                ) {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxHeight()
+                                            .aspectRatio(1F)
+                                            .clickable {
+                                                navController.navigate("ProfilePage")
+                                            },
+                                        verticalArrangement = Arrangement.Center,
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Box(
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentAlignment = Alignment.Center
+                                        ){
+                                            Box(
+                                                modifier = Modifier
+                                                    .height(40.dp)
+                                                    .width(40.dp)
+                                                    .shadow(
+                                                        color = MaterialTheme.colorScheme.onTertiary,
+                                                        borderRadius = 32.dp,
+                                                        blurRadius = 3.dp,
+                                                        offsetY = 5.dp,
+                                                        offsetX = 0.dp,
+                                                        spread = 1.dp,
+                                                    )
+                                            )
+                                            AsyncImage(
+                                                model = video.author.thumbnailURL,
+                                                modifier = Modifier
+                                                    .size(39.dp)
+                                                    .clip(CircleShape),
+                                                placeholder = painterResource(id = R.drawable.user_icon),
+                                                error = painterResource(id = R.drawable.user_icon),
+                                                contentDescription = "User Dp",
+                                            )
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                    Text(
+                                        text = video.author.username,
+                                        fontFamily = rosarioFamily,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.secondary,
+                                        fontSize = 17.sp
+                                    )
+                                }
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxHeight(0.6F)
+                                        .width(150.dp),
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    VideoViewButton(
+                                        image = -1,
+                                        text = "Subscribe",
+                                        onclick = {
+
+                                        }
+                                    )
+                                }
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .weight(1F),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Start
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxHeight(0.6F)
+                                        .weight(1F),
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    VideoViewButton(
+                                        image = R.drawable.like_icon,
+                                        text = "like",
+                                        onclick = {
+                                        }
+                                    )
+                                }
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxHeight(0.6F)
+                                        .weight(1F),
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    VideoViewButton(
+                                        image = R.drawable.share_icon,
+                                        text = "share",
+                                        onclick = {
+                                        }
+                                    )
+                                }
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxHeight(0.6F)
+                                        .weight(1F),
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    VideoViewButton(
+                                        image = R.drawable.save_icon,
+                                        text = "save",
+                                        onclick = {
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                        Spacer(modifier = Modifier.width(20.dp))
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Divider(
+                        modifier = Modifier.fillMaxWidth(0.95F),
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.tertiary
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    LazyVerticalGrid(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1F),
+                        verticalArrangement = Arrangement.Top,
+                        horizontalArrangement = Arrangement.Center,
+                        columns = GridCells.Adaptive(minSize = 370.dp)
+                    ) {
+                        items(vM.videoList.size){
+                            VideoPreview(
+                                navController = navController,
+                                vM = vM,
+                                vM.videoList[it],
+                            )
+                        }
+                    }
                 }
+                Spacer(
+                    modifier = Modifier
+                        .height(30.dp)
+                        .fillMaxWidth()
+                )
             }
         }
-        Spacer(
-            modifier = Modifier
-                .height(30.dp)
-                .fillMaxWidth()
-        )
     }
 }
 
