@@ -2,9 +2,11 @@ package com.example.streamitv1
 
 import android.util.Log
 import androidx.compose.runtime.MutableDoubleState
+import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableLongState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -42,19 +44,23 @@ class ViewModel :ViewModel(){
     private val _dpTotalChunks = mutableLongStateOf(0)
     private val _dpChunkSent = mutableLongStateOf(0)
     private val _dpPercentageUploaded = mutableDoubleStateOf(0.0)
+    private val _uploadStatus = mutableIntStateOf(0)
+
+    val uploadStatus: MutableIntState = _uploadStatus
 
 
     val videoSize: MutableLongState =  _videoSize
     val videoTotalChunks: MutableLongState = _videoTotalChunks
     val videoChunkSent: MutableLongState = _videoChunkSent
-    val videoChunkSize: Long = 1024*1024*1
+    val videoChunkSize: Long = 1024*1024*5
     val videoPercentageUploaded: MutableDoubleState = _videoPercentageUploaded
     val videoChunkList = mutableStateListOf<String>()
+
 
     val thumbnailSize: MutableLongState =  _thumbnailSize
     val thumbnailTotalChunks: MutableLongState = _thumbnailTotalChunks
     val thumbnailChunkSent: MutableLongState = _thumbnailChunkSent
-    val thumbnailChunkSize: Long = 1024*1024*1
+    val thumbnailChunkSize: Long = 1024*1024*5
     private val thumbnailPercentageUploaded: MutableDoubleState = _thumbnailPercentageUploaded
     val thumbnailChunkList = mutableStateListOf<String>()
 
@@ -62,7 +68,7 @@ class ViewModel :ViewModel(){
     val dpSize: MutableLongState =  _dpSize
     val dpTotalChunks: MutableLongState = _dpTotalChunks
     val dpChunkSent: MutableLongState = _dpChunkSent
-    val dpChunkSize: Long = 1024*1024*1
+    val dpChunkSize: Long = 1024*1024*5
     private val dpPercentageUploaded: MutableDoubleState = _dpPercentageUploaded
     private val dpChunkList = mutableStateListOf<String>()
 
@@ -113,6 +119,7 @@ class ViewModel :ViewModel(){
         if (videoTotalChunks.longValue.toInt() != 0){
             if (videoChunkSent.longValue == videoTotalChunks.longValue) {
                 Log.d("upload", "video CHUNKS TRANSFERRED ${videoChunkSent.longValue}")
+                uploadStatus.intValue = 2
                 mSocket.emit("video-uploaded", "nothing")
             } else {
                 uploadChunk( this , videoSize , videoChunkSize , videoChunkSent , videoPercentageUploaded , videoTotalChunks , videoChunkList,  "send-video")
@@ -159,6 +166,8 @@ class ViewModel :ViewModel(){
                 video.getString("tags"),
                 video.getString("description"),
                 "https://storage.googleapis.com/video-streamit/${video.getString("id")}/output/manifest.m3u8",
+                "https://storage.googleapis.com/video-streamit/${video.getString("id")}/${video.getString("id")}.mp4",
+
                 "https://storage.googleapis.com/video-streamit/${video.getString("id")}/${video.getString("id")}.png",
             )
             Log.d("VIDEO: $i" , videoFormatted.toString() )
@@ -173,7 +182,6 @@ class ViewModel :ViewModel(){
         errorType.value=""
     }
     init{
-
         mSocket = sockethandler.getSocket()
         mSocket.on("give-video" , videoChunkHandler)
         mSocket.on("give-thumbnail" , thumbnailChunkHandler)

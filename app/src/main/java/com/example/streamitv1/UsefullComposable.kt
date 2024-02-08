@@ -429,7 +429,8 @@ fun LoginNSignupIconButton(
 fun LoginNSignupButton(
     text: String,
     onclick: () -> Unit,
-    modifier: Modifier
+    modifier: Modifier,
+    isEnabled: Boolean = true
 ){
     Button(
         modifier = modifier,
@@ -440,7 +441,8 @@ fun LoginNSignupButton(
             disabledContentColor = MaterialTheme.colorScheme.primary
         ),
         onClick = { onclick() },
-        shape = RoundedCornerShape(4.dp)
+        shape = RoundedCornerShape(4.dp),
+        enabled = isEnabled
     ) {
         Text(
             text = text,

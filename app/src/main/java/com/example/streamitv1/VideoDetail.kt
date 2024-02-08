@@ -8,6 +8,7 @@ data class VideoDetail(
     val title: String,
     val tags: String,
     val description: String,
-    val videoURL: String,
+    val videoURL1: String,
+    val videoURL2: String,
     val videoThumbnail: String
 )

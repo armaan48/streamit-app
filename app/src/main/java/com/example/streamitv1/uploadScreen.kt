@@ -84,15 +84,10 @@ fun UploadScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(Modifier.height(40.dp))
-            var info = "Upload";
-            if (vM.videoPercentageUploaded.value > 0){
-                info = "Uploading ${vM.videoPercentageUploaded.value}%"
-            }else if (vM.videoPercentageUploaded.value.toInt() ==100){
-                info = "Video Uploaded"
-            }
+
             TopBar(
 
-                text = info,
+                text = "Upload",
                 vM = vM
 
             )
@@ -482,17 +477,35 @@ fun Upload(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
+            var info = "Upload";
+            if (vM.uploadStatus.intValue == 1){
+                info = "Uploading ${vM.videoPercentageUploaded.doubleValue}%"
+            }else if (vM.uploadStatus.intValue == 2){
+                info = "Video is Uploaded Successfully, Start new Upload?"
+            }
             UploadButton(
-                type = "Upload",
+
+                type = info,
                 onclick = {
-                    val data = JSONObject()
-                    data.put("author" , vM.userName.value)
-                    data.put("title",  vM.title.value)
-                    data.put("tags", vM.tags.value )
-                    data.put("description", vM.description.value)
-                    Log.d("uploadScreen" , data.toString());
-                    vM.mSocket.emit("send-video-details" , data);
-                }
+                    if (vM.uploadStatus.intValue == 2){
+                        vM.title.value = ""
+                        vM.tags.value = ""
+                        vM.description.value = ""
+                        vM.uploadStatus.intValue = 0
+                    }else {
+                        vM.uploadStatus.intValue = 1
+                        val data = JSONObject()
+                        data.put("author", vM.userName.value)
+                        data.put("title", vM.title.value)
+                        data.put("tags", vM.tags.value)
+                        data.put("description", vM.description.value)
+                        Log.d("uploadScreen", data.toString());
+                        vM.mSocket.emit("send-video-details" , data);
+
+                    }
+                },
+                isEnabled = (vM.uploadStatus.intValue != 1)
+
             )
         }
     }
@@ -501,7 +514,8 @@ fun Upload(
 @Composable
 fun UploadButton(
     type: String,
-    onclick: () -> Unit
+    onclick: () -> Unit,
+    isEnabled: Boolean = true
 ){
     Button(
         modifier = Modifier
@@ -514,7 +528,8 @@ fun UploadButton(
             disabledContentColor = MaterialTheme.colorScheme.primary
         ),
         onClick = { onclick() },
-        shape = RoundedCornerShape(4.dp)
+        shape = RoundedCornerShape(4.dp),
+        enabled = isEnabled
     ) {
         Text(
             text = type,

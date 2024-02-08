@@ -44,7 +44,7 @@ fun startChunking(
             )
             if (cursor != null) {
                 if (cursor.moveToFirst()) {
-                    size.value = cursor.getLong(0)
+                    size.longValue = cursor.getLong(0)
                 }
                 cursor.close()
             }
@@ -61,7 +61,7 @@ fun startChunking(
                     }
                     byteRead = inputStream?.read(buffer)
                 }
-                Log.d("CHUNK" ,"${totalChunks.value} CHUNKS is made" )
+                Log.d("CHUNK" ,"${totalChunks.longValue} CHUNKS is made" )
             }
         }
     }
@@ -89,7 +89,7 @@ fun uploadChunk(
         chunkSent.longValue++
 
         percentageUploaded.doubleValue =
-            min(100.0, (( ( chunkSent.value*chunkSize) * 100) / (size.longValue)).toDouble())
+            min(100.0, (( ( chunkSent.longValue*chunkSize) * 100) / (size.longValue)).toDouble())
     } else {
         Log.d("CHUNK", "fucked")
     }
