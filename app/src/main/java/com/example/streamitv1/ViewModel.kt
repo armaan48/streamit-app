@@ -25,6 +25,11 @@ class ViewModel :ViewModel(){
 
     private val _isOffsetEnabled = mutableStateOf(true)
 
+    private val _isPlaying = mutableStateOf(true)
+    private val _videoFocused = mutableStateOf(false)
+    private val _speedOpen = mutableStateOf(false)
+    private val _qualityOptionOpen = mutableStateOf(false)
+
     private val _title = mutableStateOf("")
     private val _description = mutableStateOf("")
     private val _tags = mutableStateOf("")
@@ -101,10 +106,11 @@ class ViewModel :ViewModel(){
     val descriptionExtended: MutableState<Boolean> = _descriptionExtended
     val channelName: MutableState<String> = _channelName
     val channelDescription: MutableState<String> = _channelDescription
+    val isPlaying: MutableState<Boolean> = _isPlaying
+    val videoFocused: MutableState<Boolean> = _videoFocused
+    val speedOptionOpen: MutableState<Boolean> = _speedOpen
+    val qualityOptionOpen: MutableState<Boolean> = _qualityOptionOpen
     var mSocket = sockethandler.getSocket()
-
-
-
 
     fun addChunk(type:String, data: String ){
         when(type){

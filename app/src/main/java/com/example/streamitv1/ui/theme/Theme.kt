@@ -18,7 +18,8 @@ val DarkColorScheme = darkColorScheme(
     secondary = OffWhite,
     tertiary = OffGrey,
     onTertiary =OffGrey2,
-    onError = ErrorColorB
+    onError = ErrorColorB,
+    onPrimary = DarkBlack
 )
 
 val LightColorScheme = lightColorScheme(
@@ -27,7 +28,8 @@ val LightColorScheme = lightColorScheme(
     tertiary = OffGrey,
     onTertiary =OffGrey2,
     onError = ErrorColorW2,
-    onErrorContainer = ErrorColorW
+    onErrorContainer = ErrorColorW ,
+    onPrimary = OffGrey2
 )
 
 @Composable
