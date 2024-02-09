@@ -109,6 +109,10 @@ fun login(
 
                 // this line is the problem
                 mainActivity.runOnUiThread {
+                    vM.mSocket.emit("give-liked-video-list" , vM.userName.value)
+                    vM.mSocket.emit("give-following-list" , vM.userName.value)
+                    vM.mSocket.emit("give-video-list" , "nothing")
+                    vM.mSocket.emit("give-following-video-list" , vM.userName.value)
                     navController.navigate("Main")
                 }
             } else {

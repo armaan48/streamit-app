@@ -84,7 +84,7 @@ fun VideoView(
     video: VideoDetail
 ) {
     val context = LocalContext.current
-    val exoPlayer = remember{
+    vM.exoPlayer = remember{
         ExoPlayer.Builder(context).build().apply {
             setMediaItem(
                 MediaItem.fromUri(
@@ -95,6 +95,7 @@ fun VideoView(
             playWhenReady = true
         }
     }
+
     vM.isPlaying.value = true
 
     val w = LocalConfiguration.current.screenWidthDp.dp
@@ -127,11 +128,11 @@ fun VideoView(
                         vM.videoFocused.value = !vM.videoFocused.value
                     }
             ) {
-                DisposableEffect(key1 = Unit) { onDispose { exoPlayer.release() } }
+                DisposableEffect(key1 = Unit) { onDispose { vM.exoPlayer?.release() } }
                 AndroidView(
                     factory = {
                         PlayerView(context).apply {
-                            player = exoPlayer
+                            player = vM.exoPlayer
                             useController = false
                             layoutParams = FrameLayout.LayoutParams(
                                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -141,7 +142,7 @@ fun VideoView(
                     }
                 )
                 VideoControls(
-                    exoPlayer = exoPlayer,
+                    exoPlayer = vM.exoPlayer!!,
                     vM = vM,
                     run = {
                         vM.videoFocused.value = !vM.videoFocused.value
@@ -184,11 +185,11 @@ fun VideoView(
                             }
 
                     ) {
-                        DisposableEffect(key1 = Unit) { onDispose { exoPlayer.release() } }
+                        DisposableEffect(key1 = Unit) { onDispose { vM.exoPlayer?.release() } }
                         AndroidView(
                             factory = {
                                 PlayerView(context).apply {
-                                    player = exoPlayer
+                                    player = vM.exoPlayer
                                     useController = false
                                     layoutParams = FrameLayout.LayoutParams(
                                         ViewGroup.LayoutParams.MATCH_PARENT,
@@ -204,7 +205,7 @@ fun VideoView(
                                 exit = ExitTransition.None
                             ){
                                 VideoControls(
-                                    exoPlayer = exoPlayer,
+                                    exoPlayer = vM.exoPlayer!!,
                                     vM = vM,
                                     run = {
                                         vM.videoFocused.value = !vM.videoFocused.value
@@ -873,10 +874,10 @@ fun VideoControls(
             Spacer(modifier = Modifier.width(20.dp))
             ControlIcon(
                 draw = if (vM.isPlaying.value) {
-                           R.drawable.pause_icon
-                       } else {
-                           R.drawable.play_icon
-                       },
+                    R.drawable.pause_icon
+                } else {
+                    R.drawable.play_icon
+                },
                 run = {
                     if (exoPlayer.isPlaying) {
                         vM.isPlaying.value = !vM.isPlaying.value

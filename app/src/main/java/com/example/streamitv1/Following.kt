@@ -1,5 +1,6 @@
 package com.example.streamitv1
 
+import android.util.Log
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -16,11 +17,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
@@ -42,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.streamitv1.ui.theme.rosarioFamily
 
 @Composable
@@ -90,11 +94,9 @@ fun FollowingListView(
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                items(8){
-                    FollowerList(
-                        id = R.drawable.joji_pp,
-                        name = "Joji"
-                    )
+
+                items(vM.followingList.value.toList()){
+                    FollowerList(username = it, dp = "https://storage.googleapis.com/user-streamit/${it}.png")
                 }
             }
             Spacer(
@@ -108,8 +110,8 @@ fun FollowingListView(
 
 @Composable
 fun FollowerList(
-    id : Int,
-    name : String
+    username : String,
+    dp : String
 ) {
     Row(
         modifier = Modifier
@@ -146,20 +148,20 @@ fun FollowerList(
                             spread = 1.dp,
                         )
                 )
-                Icon(
+                AsyncImage(
+                    model = dp,
                     modifier = Modifier
-                        .height(45.dp)
-                        .width(45.dp)
+                        .size(39.dp)
                         .clip(CircleShape),
-                    painter = painterResource(id),
-                    contentDescription = "back_arrow_icon_light",
-                    tint = Color.Unspecified
+                    placeholder = painterResource(id = R.drawable.user_icon),
+                    error = painterResource(id = R.drawable.user_icon),
+                    contentDescription = "Channel Dp",
                 )
             }
         }
         Spacer(modifier = Modifier.width(20.dp))
         Text(
-            text = name,
+            text = username,
             color = MaterialTheme.colorScheme.secondary,
             fontFamily = rosarioFamily,
             fontSize = 18.sp,
@@ -226,7 +228,7 @@ fun MainFollow(
                             .weight(1F)
                             .fillMaxHeight(),
                     ){
-                        FollowList()
+                        FollowList(vM)
                     }
                     Column(
                         modifier = Modifier
@@ -279,21 +281,26 @@ fun MainFollow(
 }
 
 @Composable
-fun FollowList() {
+fun FollowList(
+    vM:ViewModel
+) {
     LazyRow(
         modifier = Modifier
             .fillMaxSize(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
+        horizontalArrangement = Arrangement.Start
     ) {
-        items(20){
-            FollowListIcon()
+        items(vM.followingList.value.toList()){
+            FollowListIcon(username = it, dp = "https://storage.googleapis.com/user-streamit/${it}.png")
         }
     }
 }
 
 @Composable
-fun FollowListIcon(){
+fun FollowListIcon(
+    username: String,
+    dp : String,
+){
     Column(
         modifier = Modifier
             .fillMaxHeight()
@@ -318,14 +325,14 @@ fun FollowListIcon(){
                         spread = 1.dp,
                     )
             )
-            Icon(
+            AsyncImage(
+                model = dp,
                 modifier = Modifier
-                    .height(40.dp)
-                    .width(40.dp)
+                    .size(39.dp)
                     .clip(CircleShape),
-                painter = painterResource(R.drawable.joji_pp),
-                contentDescription = "back_arrow_icon_light",
-                tint = Color.Unspecified
+                placeholder = painterResource(id = R.drawable.user_icon),
+                error = painterResource(id = R.drawable.user_icon),
+                contentDescription = "User Dp",
             )
         }
     }

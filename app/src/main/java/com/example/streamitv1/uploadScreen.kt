@@ -318,8 +318,8 @@ fun Upload(
     }
     val pickImage = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         if (uri != null){
-            vM.thumbnailChunkList.clear()
-            startChunking(vM,uri , vM.thumbnailSize , vM.thumbnailChunkSize, vM.thumbnailChunkSent , vM.thumbnailTotalChunks , scope , context , "thumbnail")
+            vM.videoThumbnailChunkList.clear()
+            startChunking(vM,uri , vM.videoThumbnailSize , vM.videoThumbnailChunkSize, vM.videoThumbnailChunkSent , vM.videoThumbnailTotalChunks , scope , context , "thumbnail")
         }
     }
     Column(

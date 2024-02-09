@@ -39,7 +39,7 @@ fun ProfileCreation(
 
     val pickImage = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         if (uri != null){
-            vM.thumbnailChunkList.clear()
+            vM.dpChunkList.clear()
             startChunking(vM,uri , vM.dpSize , vM.dpChunkSize, vM.dpChunkSent , vM.dpTotalChunks , scope , context , "dp")
         }
     }

@@ -10,7 +10,7 @@ object sockethandler {
     lateinit var mSocket: Socket
     fun setSocket(){
         try{
-            mSocket = IO.socket("http://34.131.75.81")
+            mSocket = IO.socket("http://10.0.2.2:8080")
         }catch(e : URISyntaxException){
             println(e)
         }

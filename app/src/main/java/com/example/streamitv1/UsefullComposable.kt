@@ -540,7 +540,6 @@ fun SideOptions(
                         image = R.drawable.homepage_icon,
                         text = "Homepage",
                         onclick = {
-                            vM.mSocket.emit("give-videos" ,{});
                             if(!vM.isOffsetEnabled.value) {
 
                                 vM.isOffsetEnabled.value = !vM.isOffsetEnabled.value
@@ -554,7 +553,6 @@ fun SideOptions(
                         image = R.drawable.follow_icon,
                         text = "Following",
                         onclick = {
-                            vM.mSocket.emit("give-videos" ,{});
 
                             if(!vM.isOffsetEnabled.value){
 
@@ -584,7 +582,6 @@ fun SideOptions(
                         image = R.drawable.search_icon,
                         text = "Search",
                         onclick = {
-                            vM.mSocket.emit("give-videos" ,{});
 
                             if(!vM.isOffsetEnabled.value){
                                 vM.isOffsetEnabled.value = !vM.isOffsetEnabled.value
