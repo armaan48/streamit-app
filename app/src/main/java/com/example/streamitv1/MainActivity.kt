@@ -94,6 +94,8 @@ class MainActivity : ComponentActivity() {
                                         "https://storage.googleapis.com/video-streamit/${video.getString("id")}/output/manifest.m3u8",
                                         "https://storage.googleapis.com/video-streamit/${video.getString("id")}/${video.getString("id")}.mp4",
                                         "https://storage.googleapis.com/video-streamit/${video.getString("id")}/${video.getString("id")}.png",
+                                        video.getInt("likes"),
+                                        video.getInt("views")
                                     )
                                 )
                             }

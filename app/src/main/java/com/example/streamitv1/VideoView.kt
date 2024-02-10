@@ -68,16 +68,20 @@ import androidx.compose.ui.unit.times
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.analytics.AnalyticsListener
+import androidx.media3.exoplayer.analytics.PlaybackStats
+import androidx.media3.exoplayer.analytics.PlaybackStatsListener
 import androidx.media3.ui.PlayerView
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.streamitv1.ui.theme.rosarioFamily
-import okhttp3.internal.isSensitiveHeader
+import org.json.JSONObject
 
 
-@Composable
+@OptIn(UnstableApi::class) @Composable
 fun VideoView(
     navController: NavController,
     vM: ViewModel,
@@ -95,7 +99,6 @@ fun VideoView(
             playWhenReady = true
         }
     }
-
     vM.isPlaying.value = true
 
     val w = LocalConfiguration.current.screenWidthDp.dp
@@ -128,7 +131,10 @@ fun VideoView(
                         vM.videoFocused.value = !vM.videoFocused.value
                     }
             ) {
-                DisposableEffect(key1 = Unit) { onDispose { vM.exoPlayer?.release() } }
+                DisposableEffect(key1 = Unit) { onDispose {
+                    vM.exoPlayer?.release()
+                }
+                }
                 AndroidView(
                     factory = {
                         PlayerView(context).apply {
@@ -185,7 +191,9 @@ fun VideoView(
                             }
 
                     ) {
-                        DisposableEffect(key1 = Unit) { onDispose { vM.exoPlayer?.release() } }
+                        DisposableEffect(key1 = Unit) { onDispose {
+                            vM.exoPlayer?.release() }
+                        }
                         AndroidView(
                             factory = {
                                 PlayerView(context).apply {
@@ -255,7 +263,7 @@ fun VideoView(
                                     horizontalArrangement = Arrangement.End
                                 ) {
                                     Text(
-                                        text = "1K Views ",
+                                        text = "${video.views} Views ",
                                         fontFamily = rosarioFamily,
                                         fontWeight = FontWeight.Light,
                                         color = MaterialTheme.colorScheme.secondary,
@@ -341,7 +349,7 @@ fun VideoView(
                                                     )
                                             )
                                             AsyncImage(
-                                                model = video.author.thumbnailURL,
+                                                model = video.author.dpURL,
                                                 modifier = Modifier
                                                     .size(39.dp)
                                                     .clip(CircleShape),
@@ -368,10 +376,19 @@ fun VideoView(
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     VideoViewButton(
-                                        image = -1,
-                                        text = "Subscribe",
+                                        image = R.drawable.like_icon,
+                                        text =  if (vM.followingList.value.contains(video.author)) "Unsubscribe" else "Subscribe",
                                         onclick = {
-
+                                            val data = JSONObject();
+                                            data.put("follower_id" , vM.userName.value)
+                                            data.put("following_id",video.author.username)
+                                            if (vM.followingList.value.contains(video.author)){
+                                                vM.mSocket.emit("unfollow" , data)
+                                                vM.removeFollowing(video.author)
+                                            }else{
+                                                vM.mSocket.emit("follow" , data)
+                                                vM.addFollowing(video.author)
+                                            }
                                         }
                                     )
                                 }
@@ -392,8 +409,18 @@ fun VideoView(
                                 ) {
                                     VideoViewButton(
                                         image = R.drawable.like_icon,
-                                        text = "like",
+                                        text =  if (vM.likedVideoList.value.contains(video.id)) "Unlike" else "Like",
                                         onclick = {
+                                            val data = JSONObject();
+                                            data.put("user_id" , vM.userName.value)
+                                            data.put("video_id" ,video.id)
+                                            if (vM.likedVideoList.value.contains(video.id)){
+                                                vM.mSocket.emit("unlike" , data)
+                                                vM.unlikeVideo(video.id)
+                                            }else{
+                                                vM.mSocket.emit("like" , data)
+                                                vM.likeVideo(video.id)
+                                            }
                                         }
                                     )
                                 }
@@ -445,11 +472,13 @@ fun VideoView(
                         columns = GridCells.Adaptive(minSize = 370.dp)
                     ) {
                         items(vM.videoList.size){
-                            VideoPreview(
-                                navController = navController,
-                                vM = vM,
-                                vM.videoList[it],
-                            )
+                            if (vM.videoList[it].id != video.id) {
+                                VideoPreview(
+                                    navController = navController,
+                                    vM = vM,
+                                    vM.videoList[it],
+                                )
+                            }
                         }
                     }
                 }
@@ -477,14 +506,16 @@ fun VideoView(
                 },
             contentAlignment = Alignment.BottomCenter
         ){
-            if(settingType.value == "Main"){
-                MainSettingOptions(settingType)
-            }
-            else if(settingType.value=="Quality"){
-                QualitySettingOptions()
-            }
-            else{
-                SpeedSettingOptions()
+            when (settingType.value) {
+                "Main" -> {
+                    MainSettingOptions(settingType)
+                }
+                "Quality" -> {
+                    QualitySettingOptions()
+                }
+                else -> {
+                    SpeedSettingOptions()
+                }
             }
         }
     }

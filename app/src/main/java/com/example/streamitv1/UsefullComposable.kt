@@ -6,7 +6,6 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -53,7 +52,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.streamitv1.ui.theme.rosarioFamily
@@ -102,6 +100,8 @@ fun VideoPreview(
                         )
                         .background(MaterialTheme.colorScheme.primary)
                         .clickable {
+                            vM.exoPlayer?.release()
+                            vM.mSocket.emit("increment-views" , video.id)
                             navController.navigate("VideoPlayer/${video.str}")
                         },
                     verticalArrangement = Arrangement.Center,
@@ -151,7 +151,7 @@ fun VideoPreview(
                             )
                     )
                     AsyncImage(
-                        model = video.author.thumbnailURL,
+                        model = video.author.dpURL,
                         modifier = Modifier
                             .size(39.dp)
                             .clip(CircleShape),
@@ -540,6 +540,7 @@ fun SideOptions(
                         image = R.drawable.homepage_icon,
                         text = "Homepage",
                         onclick = {
+                            vM.mSocket.emit("give-video-list", "nothing")
                             if(!vM.isOffsetEnabled.value) {
 
                                 vM.isOffsetEnabled.value = !vM.isOffsetEnabled.value
@@ -553,7 +554,7 @@ fun SideOptions(
                         image = R.drawable.follow_icon,
                         text = "Following",
                         onclick = {
-
+                            vM.mSocket.emit("give-following-video-list" , vM.userName.value)
                             if(!vM.isOffsetEnabled.value){
 
                                 vM.isOffsetEnabled.value = !vM.isOffsetEnabled.value

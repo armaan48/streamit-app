@@ -10,5 +10,7 @@ data class VideoDetail(
     val description: String,
     val videoURL1: String,
     val videoURL2: String,
-    val videoThumbnail: String
+    val videoThumbnail: String,
+    val likes: Int,
+    val views: Int,
 )

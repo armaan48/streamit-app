@@ -15,7 +15,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -97,8 +100,37 @@ fun SearchScreen(
                 ) {
                     SearchInputField(
                         type = vM.searchInput,
-                        text = "Search"
+                        text = "Search",
+                        ondone = {
+                            vM.mSocket.emit("give-search-video-list",vM.searchInput.value)
+                        }
                     )
+
+
+                }
+                Spacer(modifier = Modifier.height(5.dp))
+
+                Divider(
+                    modifier = Modifier.fillMaxWidth(0.95F),
+                    thickness = 1.dp,
+                    color = MaterialTheme.colorScheme.tertiary
+                )
+                Spacer(modifier = Modifier.height(5.dp))
+
+                LazyVerticalGrid(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.Top,
+                    horizontalArrangement = Arrangement.Center,
+                    columns = GridCells.Adaptive(minSize = 370.dp)
+                ) {
+                    items(vM.searchVideoList.size){
+                        VideoPreview(
+                            navController = navController,
+                            vM = vM,
+                            vM.searchVideoList[it],
+                        )
+                    }
                 }
             }
             Spacer(
@@ -114,7 +146,8 @@ fun SearchScreen(
 @Composable
 fun SearchInputField(
     type : MutableState<String>,
-    text : String
+    text : String,
+    ondone: ()->Unit
 ){
     val color = MaterialTheme.colorScheme.tertiary
     val color2 = MaterialTheme.colorScheme.onTertiary
@@ -130,6 +163,11 @@ fun SearchInputField(
             unfocusedBorderColor = color,
             focusedLabelColor = Color.Red,
             unfocusedLabelColor = Color.Red
+        ),
+        keyboardActions = KeyboardActions(
+            onDone = {
+                ondone()
+            }
         ),
         textStyle = TextStyle(
             fontSize = 12.sp

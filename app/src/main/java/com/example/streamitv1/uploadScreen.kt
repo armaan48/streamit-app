@@ -319,7 +319,7 @@ fun Upload(
     val pickImage = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         if (uri != null){
             vM.videoThumbnailChunkList.clear()
-            startChunking(vM,uri , vM.videoThumbnailSize , vM.videoThumbnailChunkSize, vM.videoThumbnailChunkSent , vM.videoThumbnailTotalChunks , scope , context , "thumbnail")
+            startChunking(vM,uri , vM.videoThumbnailSize , vM.videoThumbnailChunkSize, vM.videoThumbnailChunkSent , vM.videoThumbnailTotalChunks , scope , context , "video-thumbnail")
         }
     }
     Column(
@@ -489,6 +489,8 @@ fun Upload(
                         vM.tags.value = ""
                         vM.description.value = ""
                         vM.uploadStatus.intValue = 0
+                        vM.clearChunks("video")
+                        vM.clearChunks("video-thumbnail")
                     }else {
                         vM.uploadStatus.intValue = 1
                         val data = JSONObject()

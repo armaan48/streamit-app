@@ -96,7 +96,7 @@ fun FollowingListView(
             ) {
 
                 items(vM.followingList.value.toList()){
-                    FollowerList(username = it, dp = "https://storage.googleapis.com/user-streamit/${it}.png")
+                    FollowerList(it)
                 }
             }
             Spacer(
@@ -110,8 +110,7 @@ fun FollowingListView(
 
 @Composable
 fun FollowerList(
-    username : String,
-    dp : String
+    user: UserDetail
 ) {
     Row(
         modifier = Modifier
@@ -149,7 +148,7 @@ fun FollowerList(
                         )
                 )
                 AsyncImage(
-                    model = dp,
+                    model = user.dpURL,
                     modifier = Modifier
                         .size(39.dp)
                         .clip(CircleShape),
@@ -161,7 +160,7 @@ fun FollowerList(
         }
         Spacer(modifier = Modifier.width(20.dp))
         Text(
-            text = username,
+            text = user.username,
             color = MaterialTheme.colorScheme.secondary,
             fontFamily = rosarioFamily,
             fontSize = 18.sp,
@@ -262,11 +261,11 @@ fun MainFollow(
                     horizontalArrangement = Arrangement.Center,
                     columns = GridCells.Adaptive(minSize = 370.dp)
                 ) {
-                    items(vM.videoList.size){
+                    items(vM.followingVideoList.size){
                         VideoPreview(
                             navController = navController,
                             vM = vM,
-                            vM.videoList[it],
+                            vM.followingVideoList[it],
                         )
                     }
                 }
@@ -291,15 +290,14 @@ fun FollowList(
         horizontalArrangement = Arrangement.Start
     ) {
         items(vM.followingList.value.toList()){
-            FollowListIcon(username = it, dp = "https://storage.googleapis.com/user-streamit/${it}.png")
+            FollowListIcon(it)
         }
     }
 }
 
 @Composable
 fun FollowListIcon(
-    username: String,
-    dp : String,
+    user:UserDetail
 ){
     Column(
         modifier = Modifier
@@ -326,13 +324,13 @@ fun FollowListIcon(
                     )
             )
             AsyncImage(
-                model = dp,
+                model = user.dpURL,
                 modifier = Modifier
                     .size(39.dp)
                     .clip(CircleShape),
                 placeholder = painterResource(id = R.drawable.user_icon),
                 error = painterResource(id = R.drawable.user_icon),
-                contentDescription = "User Dp",
+                contentDescription = "${user.username} Dp",
             )
         }
     }
