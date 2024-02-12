@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
@@ -26,8 +25,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,15 +35,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.streamitv1.ui.theme.rosarioFamily
 
 @Composable
 fun ProfilePage(
-    navController: NavController,
-    vM: ViewModel
-){
+    navController: NavController, mainActivity: MainActivity, vM: ViewModel
+) {
     val w = LocalConfiguration.current.screenWidthDp.dp
 
     val offsetX by animateDpAsState(
@@ -55,7 +50,7 @@ fun ProfilePage(
         label = ""
     )
 
-    SideOptions(navController,vM)
+    SideOptions(navController, mainActivity, vM)
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -70,10 +65,8 @@ fun ProfilePage(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(Modifier.height(40.dp))
             TopBar(
-                text = "Username",
-                vM = vM
+                text = "Username", vM = vM
 
             )
             Divider(
@@ -100,16 +93,15 @@ fun ProfilePage(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ){
+                        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+                    ) {
                         Box(
                             modifier = Modifier
                                 .height(55.dp)
                                 .width(55.dp)
                                 .shadow(
                                     color = MaterialTheme.colorScheme.onTertiary,
-                                    borderRadius= 32.dp,
+                                    borderRadius = 32.dp,
                                     blurRadius = 3.dp,
                                     offsetY = 5.dp,
                                     offsetX = 0.dp,
@@ -135,14 +127,14 @@ fun ProfilePage(
                         .weight(1F),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
-                ){
+                ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1F),
                         verticalArrangement = Arrangement.Bottom,
                         horizontalAlignment = Alignment.Start
-                    ){
+                    ) {
                         Text(
                             text = "Joji",
                             fontFamily = rosarioFamily,
@@ -156,7 +148,7 @@ fun ProfilePage(
                             .weight(1F),
                         verticalArrangement = Arrangement.Top,
                         horizontalAlignment = Alignment.Start
-                    ){
+                    ) {
                         Text(
                             text = "35k subscribers",
                             fontFamily = rosarioFamily,
@@ -167,11 +159,9 @@ fun ProfilePage(
                     }
                 }
                 LoginNSignupButton(
-                    text = "Subscribers",
-                    onclick = {
+                    text = "Subscribers", onclick = {
 
-                    },
-                    modifier = Modifier
+                    }, modifier = Modifier
                         .fillMaxHeight(0.5F)
                         .width(110.dp)
                 )
@@ -191,7 +181,7 @@ fun ProfilePage(
                 horizontalArrangement = Arrangement.Center,
                 columns = GridCells.Adaptive(minSize = 370.dp)
             ) {
-                items(vM.videoList.size){
+                items(vM.videoList.size) {
                     VideoPreview(
                         navController = navController,
                         vM = vM,
@@ -199,7 +189,11 @@ fun ProfilePage(
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(30.dp).fillMaxWidth())
+            Spacer(
+                modifier = Modifier
+                    .height(30.dp)
+                    .fillMaxWidth()
+            )
         }
     }
 }

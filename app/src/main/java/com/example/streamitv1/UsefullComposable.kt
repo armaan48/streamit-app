@@ -58,9 +58,7 @@ import com.example.streamitv1.ui.theme.rosarioFamily
 
 @Composable
 fun VideoPreview(
-    navController : NavController,
-    vM: ViewModel,
-    video: VideoDetail
+    navController: NavController, vM: ViewModel, video: VideoDetail
 ) {
     Column(
         modifier = Modifier
@@ -80,9 +78,7 @@ fun VideoPreview(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(
-                        top = 25.dp,
-                        start = 25.dp,
-                        end = 25.dp
+                        top = 25.dp, start = 25.dp, end = 25.dp
                     )
                     .clip(
                         shape = RoundedCornerShape(8.dp)
@@ -101,12 +97,12 @@ fun VideoPreview(
                         .background(MaterialTheme.colorScheme.primary)
                         .clickable {
                             vM.exoPlayer?.release()
-                            vM.mSocket.emit("increment-views" , video.id)
+                            vM.mSocket.emit("increment-views", video.id)
                             navController.navigate("VideoPlayer/${video.str}")
                         },
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
-                ){
+                ) {
                     AsyncImage(
                         model = video.videoThumbnail,
                         modifier = Modifier.fillMaxSize(),
@@ -134,22 +130,22 @@ fun VideoPreview(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ){
-                    Box(
-                        modifier = Modifier
-                            .height(45.dp)
-                            .width(45.dp)
-                            .shadow(
-                                color = MaterialTheme.colorScheme.onTertiary,
-                                borderRadius = 32.dp,
-                                blurRadius = 3.dp,
-                                offsetY = 5.dp,
-                                offsetX = 0.dp,
-                                spread = 1.dp,
-                            )
-                    )
+                    modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+                ) {
+                    Box(modifier = Modifier
+                        .height(45.dp)
+                        .width(45.dp)
+                        .shadow(
+                            color = MaterialTheme.colorScheme.onTertiary,
+                            borderRadius = 32.dp,
+                            blurRadius = 3.dp,
+                            offsetY = 5.dp,
+                            offsetX = 0.dp,
+                            spread = 1.dp,
+                        )
+                        .clickable {
+                            navController.navigate("ProfilePage")
+                        })
                     AsyncImage(
                         model = video.author.dpURL,
                         modifier = Modifier
@@ -169,14 +165,14 @@ fun VideoPreview(
                     .weight(1F),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
-            ){
+            ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1F),
                     verticalArrangement = Arrangement.Bottom,
                     horizontalAlignment = Alignment.Start
-                ){
+                ) {
                     Text(
                         text = video.author.username,
                         fontFamily = rosarioFamily,
@@ -190,7 +186,7 @@ fun VideoPreview(
                         .weight(1F),
                     verticalArrangement = Arrangement.Top,
                     horizontalAlignment = Alignment.Start
-                ){
+                ) {
                     Text(
                         text = video.title,
                         fontFamily = rosarioFamily,
@@ -207,11 +203,10 @@ fun VideoPreview(
                     .clip(
                         shape = RoundedCornerShape(50.dp)
                     )
-                    .clickable {
-                    },
+                    .clickable {},
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.End
-            ){
+            ) {
                 Column(
                     modifier = Modifier
                         .fillMaxHeight()
@@ -223,7 +218,8 @@ fun VideoPreview(
                         modifier = Modifier
                             .height(30.dp)
                             .aspectRatio(1F),
-                        painter = painterResource(R.drawable.three_dots_hollow), contentDescription = "back_arrow_icon_light",
+                        painter = painterResource(R.drawable.three_dots_hollow),
+                        contentDescription = "back_arrow_icon_light",
                         tint = MaterialTheme.colorScheme.secondary
                     )
                 }
@@ -240,9 +236,8 @@ fun VideoPreview(
 
 @Composable
 fun TopBar(
-    text: String,
-    vM:ViewModel
-){
+    text: String, vM: ViewModel
+) {
     Row(
         modifier = Modifier
             .height(80.dp)
@@ -279,11 +274,10 @@ fun TopBar(
         Column(
             modifier = Modifier
                 .fillMaxHeight()
-                .aspectRatio(1F)
-                ,
+                .aspectRatio(1F),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
-        ){}
+        ) {}
     }
 }
 
@@ -295,50 +289,46 @@ fun Modifier.shadow(
     offsetX: Dp = 0.dp,
     spread: Dp = 0f.dp,
     modifier: Modifier = Modifier
-) = this.then(
-    modifier.drawBehind {
-        this.drawIntoCanvas {
-            val paint = Paint()
-            val frameworkPaint = paint.asFrameworkPaint()
-            val spreadPixel = spread.toPx()
-            val leftPixel = (0f - spreadPixel) + offsetX.toPx()
-            val topPixel = (0f - spreadPixel) + offsetY.toPx()
-            val rightPixel = (this.size.width + spreadPixel)
-            val bottomPixel = (this.size.height + spreadPixel)
+) = this.then(modifier.drawBehind {
+    this.drawIntoCanvas {
+        val paint = Paint()
+        val frameworkPaint = paint.asFrameworkPaint()
+        val spreadPixel = spread.toPx()
+        val leftPixel = (0f - spreadPixel) + offsetX.toPx()
+        val topPixel = (0f - spreadPixel) + offsetY.toPx()
+        val rightPixel = (this.size.width + spreadPixel)
+        val bottomPixel = (this.size.height + spreadPixel)
 
-            if (blurRadius != 0.dp) {
-                frameworkPaint.maskFilter =
-                    (BlurMaskFilter(blurRadius.toPx(), BlurMaskFilter.Blur.NORMAL))
-            }
-
-            frameworkPaint.color = color.toArgb()
-            it.drawRoundRect(
-                left = leftPixel,
-                top = topPixel,
-                right = rightPixel,
-                bottom = bottomPixel,
-                radiusX = borderRadius.toPx(),
-                radiusY = borderRadius.toPx(),
-                paint
-            )
+        if (blurRadius != 0.dp) {
+            frameworkPaint.maskFilter =
+                (BlurMaskFilter(blurRadius.toPx(), BlurMaskFilter.Blur.NORMAL))
         }
+
+        frameworkPaint.color = color.toArgb()
+        it.drawRoundRect(
+            left = leftPixel,
+            top = topPixel,
+            right = rightPixel,
+            bottom = bottomPixel,
+            radiusX = borderRadius.toPx(),
+            radiusY = borderRadius.toPx(),
+            paint
+        )
     }
-)
+})
 
 
 @Composable
 fun LoginNSignupIntroText(
-    text : String
-){
+    text: String
+) {
     AnimatedContent(
-        targetState = text,
-        transitionSpec = {
-            ( fadeIn() ).togetherWith( fadeOut() )
+        targetState = text, transitionSpec = {
+            (fadeIn()).togetherWith(fadeOut())
         }, label = ""
     ) { targetCount ->
         Text(
-            modifier = Modifier
-                .fillMaxWidth(0.78F),
+            modifier = Modifier.fillMaxWidth(0.78F),
             text = targetCount,
             color = MaterialTheme.colorScheme.secondary,
             lineHeight = 20.sp,
@@ -352,10 +342,8 @@ fun LoginNSignupIntroText(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginNSignupInputField(
-    type : MutableState<String>,
-    text : String,
-    error : Boolean
-){
+    type: MutableState<String>, text: String, error: Boolean
+) {
     val color = MaterialTheme.colorScheme.tertiary
     val color2 = MaterialTheme.colorScheme.onTertiary
     OutlinedTextField(
@@ -377,9 +365,7 @@ fun LoginNSignupInputField(
         ),
         label = {
             Text(
-                modifier=Modifier.padding(2.dp),
-                text = text,
-                color = color2
+                modifier = Modifier.padding(2.dp), text = text, color = color2
             )
         },
         shape = RoundedCornerShape(4.dp)
@@ -388,25 +374,22 @@ fun LoginNSignupInputField(
 
 @Composable
 fun LoginNSignupIconButton(
-    reset: ()-> Unit
-){
+    reset: () -> Unit
+) {
     Column(
         modifier = Modifier
             .height(55.dp)
             .width(50.dp)
             .clip(
                 shape = RoundedCornerShape(
-                    topEnd = 50.dp,
-                    bottomEnd = 50.dp
+                    topEnd = 50.dp, bottomEnd = 50.dp
                 )
             )
             .background(MaterialTheme.colorScheme.secondary)
             .clickable {
                 reset()
-            },
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.End
-    ){
+            }, verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.End
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxHeight()
@@ -418,7 +401,8 @@ fun LoginNSignupIconButton(
                 modifier = Modifier
                     .height(30.dp)
                     .aspectRatio(1F),
-                painter = painterResource(R.drawable.back_arrow_icon), contentDescription = "back_arrow_icon_light",
+                painter = painterResource(R.drawable.back_arrow_icon),
+                contentDescription = "back_arrow_icon_light",
                 tint = MaterialTheme.colorScheme.primary
             )
         }
@@ -427,37 +411,28 @@ fun LoginNSignupIconButton(
 
 @Composable
 fun LoginNSignupButton(
-    text: String,
-    onclick: () -> Unit,
-    modifier: Modifier,
-    isEnabled: Boolean = true
-){
+    text: String, onclick: () -> Unit, modifier: Modifier, isEnabled: Boolean = true
+) {
     Button(
-        modifier = modifier,
-        colors = ButtonDefaults.buttonColors(
+        modifier = modifier, colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.secondary,
             contentColor = MaterialTheme.colorScheme.primary,
             disabledContainerColor = MaterialTheme.colorScheme.secondary,
             disabledContentColor = MaterialTheme.colorScheme.primary
-        ),
-        onClick = { onclick() },
-        shape = RoundedCornerShape(4.dp),
-        enabled = isEnabled
+        ), onClick = { onclick() }, shape = RoundedCornerShape(4.dp), enabled = isEnabled
     ) {
         Text(
-            text = text,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Normal
+            text = text, fontSize = 11.sp, fontWeight = FontWeight.Normal
         )
     }
 }
 
 @Composable
 fun SideOptions(
-    navController: NavController,
-    vM: ViewModel
-){
+    navController: NavController, mainActivity: MainActivity, vM: ViewModel
+) {
     val w = LocalConfiguration.current.screenWidthDp.dp
+    val context = mainActivity.applicationContext
 
     Column(
         modifier = Modifier
@@ -465,15 +440,15 @@ fun SideOptions(
             .background(MaterialTheme.colorScheme.secondary),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
-    ){
-        Spacer(modifier = Modifier.height(60.dp))
+    ) {
+        Spacer(modifier = Modifier.height(20.dp))
         Row(
             modifier = Modifier
                 .height(60.dp)
                 .width(((5 * w) / 8)),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
-        ){
+        ) {
             Spacer(Modifier.width(20.dp))
             Column(
                 modifier = Modifier
@@ -527,83 +502,64 @@ fun SideOptions(
                 .width(((5 * w) / 8)),
             verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.Start
-        ){
+        ) {
             LazyColumn(
                 modifier = Modifier
                     .weight(1F)
                     .width(((5 * w) / 8)),
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.Start
-            ){
-                item{
-                    SideBarOption(
-                        image = R.drawable.homepage_icon,
-                        text = "Homepage",
-                        onclick = {
-                            vM.mSocket.emit("give-video-list", "nothing")
-                            if(!vM.isOffsetEnabled.value) {
+            ) {
+                item {
+                    SideBarOption(image = R.drawable.homepage_icon, text = "Homepage", onclick = {
+                        vM.mSocket.emit("give-video-list", "nothing")
+                        if (!vM.isOffsetEnabled.value) {
 
-                                vM.isOffsetEnabled.value = !vM.isOffsetEnabled.value
-                                navController.navigate("HomePage")
-                            }
+                            vM.isOffsetEnabled.value = !vM.isOffsetEnabled.value
+                            navController.navigate("HomePage")
                         }
-                    )
+                    })
                 }
-                item{
-                    SideBarOption(
-                        image = R.drawable.follow_icon,
-                        text = "Following",
-                        onclick = {
-                            vM.mSocket.emit("give-following-video-list" , vM.userName.value)
-                            if(!vM.isOffsetEnabled.value){
+                item {
+                    SideBarOption(image = R.drawable.follow_icon, text = "Following", onclick = {
+                        vM.mSocket.emit("give-following-video-list", vM.userName.value)
+                        if (!vM.isOffsetEnabled.value) {
 
-                                vM.isOffsetEnabled.value = !vM.isOffsetEnabled.value
-                                navController.navigate("Following")
-                            }
+                            vM.isOffsetEnabled.value = !vM.isOffsetEnabled.value
+                            navController.navigate("Following")
                         }
-                    )
+                    })
                 }
-                item{
-                    SideBarOption(
-                        image = R.drawable.upload_icon,
-                        text = "Upload",
-                        onclick = {
+                item {
+                    SideBarOption(image = R.drawable.upload_icon, text = "Upload", onclick = {
 
-                            if(!vM.isOffsetEnabled.value){
-                                Log.d("debug my-app" , "Upload");
+                        if (!vM.isOffsetEnabled.value) {
+                            Log.d("debug my-app", "Upload")
 
-                                vM.isOffsetEnabled.value = !vM.isOffsetEnabled.value
-                                navController.navigate("Upload")
-                            }
+                            vM.isOffsetEnabled.value = !vM.isOffsetEnabled.value
+                            navController.navigate("Upload")
                         }
-                    )
+                    })
                 }
-                item{
-                    SideBarOption(
-                        image = R.drawable.search_icon,
-                        text = "Search",
-                        onclick = {
+                item {
+                    SideBarOption(image = R.drawable.search_icon, text = "Search", onclick = {
 
-                            if(!vM.isOffsetEnabled.value){
-                                vM.isOffsetEnabled.value = !vM.isOffsetEnabled.value
-                                navController.navigate("Search")
-                            }
+                        if (!vM.isOffsetEnabled.value) {
+                            vM.isOffsetEnabled.value = !vM.isOffsetEnabled.value
+                            navController.navigate("Search")
                         }
-                    )
+                    })
                 }
             }
             Spacer(modifier = Modifier.height(35.dp))
-            SideBarOption(
-                image = R.drawable.logout_icon,
-                text = "Log out",
-                onclick = {
-                    vM.reset()
-                    if(!vM.isOffsetEnabled.value){
-                        vM.isOffsetEnabled.value = !vM.isOffsetEnabled.value
-                        navController.navigate("LoginSection")
-                    }
+            SideBarOption(image = R.drawable.logout_icon, text = "Log out", onclick = {
+                vM.reset()
+                if (!vM.isOffsetEnabled.value) {
+                    vM.saveUserCredentials(context, "", "")
+                    vM.isOffsetEnabled.value = !vM.isOffsetEnabled.value
+                    navController.navigate("LoginSection")
                 }
-            )
+            })
             Spacer(modifier = Modifier.height(40.dp))
         }
     }
@@ -611,10 +567,8 @@ fun SideOptions(
 
 @Composable
 fun SideBarOption(
-    image : Int,
-    text : String,
-    onclick: () -> Unit
-){
+    image: Int, text: String, onclick: () -> Unit
+) {
     val w = LocalConfiguration.current.screenWidthDp.dp
     Row(
         modifier = Modifier
@@ -623,7 +577,7 @@ fun SideBarOption(
             .clickable { onclick() },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
-    ){
+    ) {
         Spacer(Modifier.width(20.dp))
         Column(
             modifier = Modifier
@@ -636,7 +590,8 @@ fun SideBarOption(
                 modifier = Modifier
                     .height(28.dp)
                     .aspectRatio(1F),
-                painter = painterResource(image), contentDescription = "back_arrow_icon_light",
+                painter = painterResource(image),
+                contentDescription = "back_arrow_icon_light",
                 tint = MaterialTheme.colorScheme.primary
             )
         }

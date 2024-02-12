@@ -37,10 +37,9 @@ private lateinit var key: ByteArray
 
 // set Key
 fun setKey(myKey: String) {
-    var sha: MessageDigest? = null
     try {
         key = myKey.toByteArray(charset("UTF-8"))
-        sha = MessageDigest.getInstance("SHA-1")
+        val sha = MessageDigest.getInstance("SHA-1")
         key = sha.digest(key)
         key = key.copyOf(16)
         secretKey = SecretKeySpec(key, "AES")
@@ -57,8 +56,9 @@ fun encrypt(strToEncrypt: String, secret: String): String? {
         setKey(secret)
         val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
         cipher.init(Cipher.ENCRYPT_MODE, secretKey)
-        return Base64.getEncoder().encodeToString(cipher.doFinal
-            (strToEncrypt.toByteArray(charset("UTF-8"))))
+        return Base64.getEncoder().encodeToString(
+            cipher.doFinal(strToEncrypt.toByteArray(charset("UTF-8")))
+        )
     } catch (e: Exception) {
 
         println("Error while encrypting: $e")
@@ -73,8 +73,11 @@ fun decrypt(strToDecrypt: String?, secret: String): String? {
         setKey(secret)
         val cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING")
         cipher.init(Cipher.DECRYPT_MODE, secretKey)
-        return String(cipher.doFinal(Base64.getDecoder().
-        decode(strToDecrypt)))
+        return String(
+            cipher.doFinal(
+                Base64.getDecoder().decode(strToDecrypt)
+            )
+        )
     } catch (e: Exception) {
         println(e)
     }
@@ -84,8 +87,7 @@ fun decrypt(strToDecrypt: String?, secret: String): String? {
 @RequiresApi(Build.VERSION_CODES.O)
 @Throws(GeneralSecurityException::class, IOException::class)
 fun loadPublicKey(stored: String): Key {
-    val data: ByteArray = Base64.getDecoder().
-    decode(stored.toByteArray())
+    val data: ByteArray = Base64.getDecoder().decode(stored.toByteArray())
     val spec = X509EncodedKeySpec(data)
     val fact = KeyFactory.getInstance("RSA")
     return fact.generatePublic(spec)
@@ -96,8 +98,7 @@ fun loadPublicKey(stored: String): Key {
 
 
 fun loadPrivateKey(key64: String): PrivateKey {
-    val clear: ByteArray = Base64.getDecoder().
-    decode(key64.toByteArray())
+    val clear: ByteArray = Base64.getDecoder().decode(key64.toByteArray())
     val keySpec = PKCS8EncodedKeySpec(clear)
     val fact = KeyFactory.getInstance("RSA")
     val priv = fact.generatePrivate(keySpec)
@@ -109,21 +110,22 @@ fun loadPrivateKey(key64: String): PrivateKey {
 @RequiresApi(Build.VERSION_CODES.O)
 @Throws(Exception::class)
 fun encryptMessage(plainText: String, publickey: String): String {
-    val cipher = Cipher.
-    getInstance("RSA/ECB/OAEPWithSHA-1AndMGF1Padding")
+    val cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-1AndMGF1Padding")
     cipher.init(Cipher.ENCRYPT_MODE, loadPublicKey(publickey))
-    return Base64.getEncoder().encodeToString(cipher.doFinal
+    return Base64.getEncoder().encodeToString(
+        cipher.doFinal
 
-        (plainText.toByteArray()))
+            (plainText.toByteArray())
+    )
 }
 
 // Decrypt using privatekey
 @RequiresApi(Build.VERSION_CODES.O)
 @Throws(Exception::class)
 fun decryptMessage(encryptedText: String?, privatekey: String): String {
-    val cipher = Cipher.
-    getInstance("RSA/ECB/OAEPWithSHA-1AndMGF1Padding")
+    val cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-1AndMGF1Padding")
     cipher.init(Cipher.DECRYPT_MODE, loadPrivateKey(privatekey))
-    return String(cipher.
-    doFinal(Base64.getDecoder().decode(encryptedText)))
+    return String(
+        cipher.doFinal(Base64.getDecoder().decode(encryptedText))
+    )
 }

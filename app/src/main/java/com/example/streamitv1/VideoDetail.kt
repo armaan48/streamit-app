@@ -13,4 +13,5 @@ data class VideoDetail(
     val videoThumbnail: String,
     val likes: Int,
     val views: Int,
+    val isLive: Int
 )

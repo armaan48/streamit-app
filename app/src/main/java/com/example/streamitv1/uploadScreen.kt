@@ -28,6 +28,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -39,9 +40,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -54,9 +57,8 @@ import org.json.JSONObject
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun UploadScreen(
-    navController: NavController,
-    vM: ViewModel
-){
+    navController: NavController, mainActivity: MainActivity, vM: ViewModel
+) {
     val w = LocalConfiguration.current.screenWidthDp.dp
 
     val offsetX by animateDpAsState(
@@ -65,7 +67,7 @@ fun UploadScreen(
         label = ""
     )
 
-    SideOptions(navController,vM)
+    SideOptions(navController, mainActivity, vM)
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -80,81 +82,74 @@ fun UploadScreen(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(Modifier.height(40.dp))
-
             TopBar(
-
-                text = "Upload",
-                vM = vM
-
+                text = "Upload", vM = vM
             )
             Divider(
                 modifier = Modifier.fillMaxWidth(0.95F),
                 thickness = 1.dp,
                 color = MaterialTheme.colorScheme.tertiary
             )
-            if(vM.uploadType.value==""){
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1F),
-                    verticalArrangement = Arrangement.Top,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Spacer(modifier = Modifier.height(30.dp))
+            when (vM.uploadType.value) {
+                "" -> {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(60.dp),
+                            .weight(1F),
                         verticalArrangement = Arrangement.Top,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        UploadButton(
-                            type = "Initiate Live",
-                            onclick = {
+                        Spacer(modifier = Modifier.height(30.dp))
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(60.dp),
+                            verticalArrangement = Arrangement.Top,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            UploadButton(type = "Initiate Live", onclick = {
                                 vM.uploadType.value = "Live"
-                            }
-                        )
+                            })
+                        }
+                        Spacer(modifier = Modifier.height(20.dp))
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(60.dp),
+                            verticalArrangement = Arrangement.Top,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            UploadButton(type = "Upload Video", onclick = {
+                                vM.uploadType.value = "Upload"
+                            })
+                        }
                     }
-                    Spacer(modifier = Modifier.height(20.dp))
+                }
+
+                "Live" -> {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(60.dp),
+                            .weight(1F),
                         verticalArrangement = Arrangement.Top,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        UploadButton(
-                            type = "Upload Video",
-                            onclick = {
-                                vM.uploadType.value = "Upload"
-                            }
-                        )
+                        Live(vM)
                     }
                 }
-            }
-            else if(vM.uploadType.value=="Live"){
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1F),
-                    verticalArrangement = Arrangement.Top,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ){
-                    Live(vM)
-                }
-            }
-            else{
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1F),
-                    verticalArrangement = Arrangement.Top,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ){
-                    Upload(
-                        vM = vM
-                    )
+
+                else -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1F),
+                        verticalArrangement = Arrangement.Top,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Upload(
+                            vM = vM
+                        )
+                    }
                 }
             }
             Spacer(
@@ -166,14 +161,36 @@ fun UploadScreen(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Live(
     vM: ViewModel
 ) {
 
+    val clipboardManager = LocalClipboardManager.current
+
+
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val pickImage =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            if (uri != null) {
+                vM.liveThumbnailChunkList.clear()
+                startChunking(
+                    vM,
+                    uri,
+                    vM.liveThumbnailSize,
+                    vM.liveThumbnailChunkSize,
+                    vM.liveThumbnailTotalChunks,
+                    scope,
+                    context,
+                    "live-thumbnail"
+                )
+            }
+        }
+
     Column(
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
@@ -224,7 +241,7 @@ fun Live(
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.End
-                )  {
+                ) {
                     Row(
                         modifier = Modifier
                             .fillMaxHeight()
@@ -250,11 +267,9 @@ fun Live(
                     .height(60.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
-            ){
+            ) {
                 LoginInputField(
-                    type = vM.title,
-                    error = false,
-                    text = "title"
+                    type = vM.title, error = false, text = "title"
                 )
             }
             Spacer(modifier = Modifier.height(15.dp))
@@ -264,11 +279,9 @@ fun Live(
                     .height(60.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
-            ){
+            ) {
                 LoginInputField(
-                    type = vM.description,
-                    error = false,
-                    text = "description"
+                    type = vM.description, error = false, text = "description"
                 )
             }
             Spacer(modifier = Modifier.height(15.dp))
@@ -278,27 +291,97 @@ fun Live(
                     .height(60.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
-            ){
+            ) {
                 LoginInputField(
-                    type = vM.tags,
-                    error = false,
-                    text = "tags"
+                    type = vM.tags, error = false, text = "tags"
                 )
+            }
+            Spacer(modifier = Modifier.height(20.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(55.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Top
+            ) {
+                UploadButton(type = "Live Thumbnail", onclick = {
+                    pickImage.launch("image/*")
+                })
             }
         }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(60.dp),
+                .height(if (vM.liveStatus.value == 2) 135.dp else 60.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-            UploadButton(
-                type = "Start Live",
-                onclick = {
+            when (vM.liveStatus.value) {
+                0 -> UploadButton(type = "Initiate Live", onclick = {
+                    val data = JSONObject()
+                    data.put("author", vM.userName.value)
+                    data.put("title", vM.title.value)
+                    data.put("tags", vM.tags.value)
+                    data.put("description", vM.description.value)
+                    Log.d("uploadScreen", data.toString())
+                    vM.mSocket.emit("send-live-details", data)
+                    vM.liveStatus.value = 1
+                })
 
+                2 -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(60.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        LoginInputField(type = vM.liveServer,
+                            error = false,
+                            text = "server id",
+                            readOnly = true,
+                            trailingIcon = {
+                                IconButton(onClick = {
+                                    clipboardManager.setText(AnnotatedString(vM.liveServer.value))
+                                }) {
+                                    Icon(
+                                        painterResource(id = androidx.appcompat.R.drawable.abc_ic_menu_copy_mtrl_am_alpha),
+                                        "server id"
+                                    )
+                                }
+                            })
+                    }
+                    Spacer(modifier = Modifier.height(15.dp))
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(60.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        LoginInputField(type = vM.livePassword,
+                            error = false,
+                            text = "server password",
+                            readOnly = true,
+                            trailingIcon = {
+                                IconButton(onClick = {
+                                    clipboardManager.setText(AnnotatedString(vM.livePassword.value))
+                                }) {
+                                    Icon(
+                                        painterResource(id = androidx.appcompat.R.drawable.abc_ic_menu_copy_mtrl_am_alpha),
+                                        "server password"
+                                    )
+                                }
+                            })
+                    }
                 }
-            )
+
+                else -> {
+                    UploadButton(type = "Starting Live", onclick = {})
+                }
+            }
+
+
         }
     }
 }
@@ -310,21 +393,40 @@ fun Upload(
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val pickVideo = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        if (uri != null){
-            vM.videoChunkList.clear()
-            startChunking(vM,uri , vM.videoSize , vM.videoChunkSize, vM.videoChunkSent , vM.videoTotalChunks , scope , context , "video")
+    val pickVideo =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            if (uri != null) {
+                vM.videoChunkList.clear()
+                startChunking(
+                    vM,
+                    uri,
+                    vM.videoSize,
+                    vM.videoChunkSize,
+                    vM.videoTotalChunks,
+                    scope,
+                    context,
+                    "video"
+                )
+            }
         }
-    }
-    val pickImage = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        if (uri != null){
-            vM.videoThumbnailChunkList.clear()
-            startChunking(vM,uri , vM.videoThumbnailSize , vM.videoThumbnailChunkSize, vM.videoThumbnailChunkSent , vM.videoThumbnailTotalChunks , scope , context , "video-thumbnail")
+    val pickImage =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            if (uri != null) {
+                vM.videoThumbnailChunkList.clear()
+                startChunking(
+                    vM,
+                    uri,
+                    vM.videoThumbnailSize,
+                    vM.videoThumbnailChunkSize,
+                    vM.videoThumbnailTotalChunks,
+                    scope,
+                    context,
+                    "video-thumbnail"
+                )
+            }
         }
-    }
     Column(
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
@@ -375,7 +477,7 @@ fun Upload(
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.End
-                )  {
+                ) {
                     Row(
                         modifier = Modifier
                             .fillMaxHeight()
@@ -401,11 +503,9 @@ fun Upload(
                     .height(60.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
-            ){
+            ) {
                 LoginInputField(
-                    type = vM.title,
-                    error = false,
-                    text = "title"
+                    type = vM.title, error = false, text = "title"
                 )
             }
             Spacer(modifier = Modifier.height(15.dp))
@@ -415,11 +515,9 @@ fun Upload(
                     .height(60.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
-            ){
+            ) {
                 LoginInputField(
-                    type = vM.description,
-                    error = false,
-                    text = "description"
+                    type = vM.description, error = false, text = "description"
                 )
             }
             Spacer(modifier = Modifier.height(15.dp))
@@ -429,11 +527,9 @@ fun Upload(
                     .height(60.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
-            ){
+            ) {
                 LoginInputField(
-                    type = vM.tags,
-                    error = false,
-                    text = "tags"
+                    type = vM.tags, error = false, text = "tags"
                 )
             }
             Spacer(modifier = Modifier.height(25.dp))
@@ -444,12 +540,9 @@ fun Upload(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top
             ) {
-                UploadButton(
-                    type = "Select Video",
-                    onclick = {
-                        pickVideo.launch("video/*");
-                    }
-                )
+                UploadButton(type = "Select Video", onclick = {
+                    pickVideo.launch("video/*")
+                })
             }
             Spacer(modifier = Modifier.height(20.dp))
             Column(
@@ -459,12 +552,9 @@ fun Upload(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top
             ) {
-                UploadButton(
-                    type = "Thumbnail",
-                    onclick = {
-                        pickImage.launch("image/*")
-                    }
-                )
+                UploadButton(type = "Thumbnail", onclick = {
+                    pickImage.launch("image/*")
+                })
             }
         }
         Column(
@@ -474,36 +564,34 @@ fun Upload(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-            var info = "Upload";
-            if (vM.uploadStatus.intValue == 1){
+            var info = "Upload"
+            if (vM.uploadStatus.intValue == 1) {
                 info = "Uploading ${vM.videoPercentageUploaded.doubleValue}%"
-            }else if (vM.uploadStatus.intValue == 2){
+            } else if (vM.uploadStatus.intValue == 2) {
                 info = "Video is Uploaded Successfully, Start new Upload?"
             }
             UploadButton(
 
-                type = info,
-                onclick = {
-                    if (vM.uploadStatus.intValue == 2){
+                type = info, onclick = {
+                    if (vM.uploadStatus.intValue == 2) {
                         vM.title.value = ""
                         vM.tags.value = ""
                         vM.description.value = ""
                         vM.uploadStatus.intValue = 0
                         vM.clearChunks("video")
                         vM.clearChunks("video-thumbnail")
-                    }else {
+                    } else {
                         vM.uploadStatus.intValue = 1
                         val data = JSONObject()
                         data.put("author", vM.userName.value)
                         data.put("title", vM.title.value)
                         data.put("tags", vM.tags.value)
                         data.put("description", vM.description.value)
-                        Log.d("uploadScreen", data.toString());
-                        vM.mSocket.emit("send-video-details" , data);
+                        Log.d("uploadScreen", data.toString())
+                        vM.mSocket.emit("send-video-details", data)
 
                     }
-                },
-                isEnabled = (vM.uploadStatus.intValue != 1)
+                }, isEnabled = (vM.uploadStatus.intValue != 1)
 
             )
         }
@@ -512,10 +600,8 @@ fun Upload(
 
 @Composable
 fun UploadButton(
-    type: String,
-    onclick: () -> Unit,
-    isEnabled: Boolean = true
-){
+    type: String, onclick: () -> Unit, isEnabled: Boolean = true
+) {
     Button(
         modifier = Modifier
             .fillMaxHeight(0.95F)
@@ -531,9 +617,7 @@ fun UploadButton(
         enabled = isEnabled
     ) {
         Text(
-            text = type,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Normal
+            text = type, fontSize = 11.sp, fontWeight = FontWeight.Normal
         )
     }
 }
@@ -542,10 +626,12 @@ fun UploadButton(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginInputField(
-    type : MutableState<String>,
-    text : String,
-    error : Boolean
-){
+    type: MutableState<String>,
+    text: String,
+    error: Boolean,
+    readOnly: Boolean = false,
+    trailingIcon: @Composable () -> Unit = {}
+) {
     val color = MaterialTheme.colorScheme.tertiary
     val color2 = MaterialTheme.colorScheme.onTertiary
     OutlinedTextField(
@@ -562,16 +648,19 @@ fun LoginInputField(
             focusedLabelColor = Color.Red,
             unfocusedLabelColor = Color.Red
         ),
+        readOnly = readOnly,
+        trailingIcon = trailingIcon,
         textStyle = TextStyle(
             fontSize = 12.sp
         ),
         label = {
             Text(
-                modifier=Modifier.padding(2.dp),
-                text = text,
-                color = color2
+                modifier = Modifier.padding(2.dp), text = text, color = color2
             )
         },
         shape = RoundedCornerShape(4.dp)
     )
 }
+
+
+

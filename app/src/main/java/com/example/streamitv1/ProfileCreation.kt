@@ -19,10 +19,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import org.json.JSONObject
 
@@ -32,17 +30,19 @@ fun ProfileCreation(
     navController: NavController,
     vM: ViewModel,
 ) {
-    val w = LocalConfiguration.current.screenWidthDp.dp
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
 
-    val pickImage = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        if (uri != null){
-            vM.dpChunkList.clear()
-            startChunking(vM,uri , vM.dpSize , vM.dpChunkSize, vM.dpChunkSent , vM.dpTotalChunks , scope , context , "dp")
+    val pickImage =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            if (uri != null) {
+                vM.dpChunkList.clear()
+                startChunking(
+                    vM, uri, vM.dpSize, vM.dpChunkSize, vM.dpTotalChunks, scope, context, "dp"
+                )
+            }
         }
-    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -79,9 +79,7 @@ fun ProfileCreation(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 LoginNSignupInputField(
-                    type  = vM.channelName,
-                    text = "Enter Channel Name",
-                    error = false
+                    type = vM.channelName, text = "Enter Channel Name", error = false
                 )
             }
             Spacer(modifier = Modifier.height(13.dp))
@@ -93,7 +91,7 @@ fun ProfileCreation(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 LoginNSignupInputField(
-                    type  = vM.channelDescription ,
+                    type = vM.channelDescription,
                     text = "Enter Channel Description",
                     error = false,
                 )
@@ -106,23 +104,20 @@ fun ProfileCreation(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                LoginNSignupButton(
-                    modifier = Modifier
-                        .fillMaxHeight(0.95F)
-                        .fillMaxWidth(0.78F),
+                LoginNSignupButton(modifier = Modifier
+                    .fillMaxHeight(0.95F)
+                    .fillMaxWidth(0.78F),
                     text = "Select Profile Picture",
                     onclick = {
                         pickImage.launch("image/*")
-                    }
-                )
+                    })
             }
         }
         Column(
-            modifier = Modifier
-                .background(color = MaterialTheme.colorScheme.primary),
+            modifier = Modifier.background(color = MaterialTheme.colorScheme.primary),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
-        ){
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -130,32 +125,32 @@ fun ProfileCreation(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                LoginNSignupButton(
-                    modifier = Modifier
-                        .fillMaxHeight(0.95F)
-                        .fillMaxWidth(0.78F),
+                LoginNSignupButton(modifier = Modifier
+                    .fillMaxHeight(0.95F)
+                    .fillMaxWidth(0.78F),
                     text = "Create Account",
                     onclick = {
                         val data = JSONObject()
 
-                        data.put("username",  vM.userName.value)
-                        data.put("channelName" , vM.channelName.value)
-                        data.put("channelDescription" , vM.channelDescription.value)
+                        data.put("username", vM.userName.value)
+                        data.put("channelName", vM.channelName.value)
+                        data.put("channelDescription", vM.channelDescription.value)
                         data.put("publicKey", vM.publicKeyString.value)
                         data.put("encryptedPrivateKey", vM.encryptedPrivateKey.value)
                         data.put("encryptedPassword", vM.encryptedPassword.value)
 
-                        Log.d("streamit" , data.toString())
+                        Log.d("streamit", data.toString())
 
-                        vM.mSocket.emit("signup-complete" , data)
+                        vM.mSocket.emit("signup-complete", data)
 
                         navController.navigate("Main")
-                    }
-                )
+                    })
             }
-            Spacer(modifier = Modifier
-                .height(50.dp)
-                .fillMaxWidth())
+            Spacer(
+                modifier = Modifier
+                    .height(50.dp)
+                    .fillMaxWidth()
+            )
         }
     }
 }

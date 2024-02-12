@@ -8,6 +8,7 @@ import org.json.JSONObject
 import java.security.KeyPairGenerator
 import java.util.Base64
 
+
 @RequiresApi(Build.VERSION_CODES.O)
 fun signup(
     username: String,
@@ -15,9 +16,8 @@ fun signup(
     navController: NavController,
     mainActivity: MainActivity,
     vM: ViewModel
-){
-
-
+) {
+    val context = mainActivity.applicationContext
     val keyPairGenerator = KeyPairGenerator.getInstance("RSA")
     keyPairGenerator.initialize(3072)
     val keyPair = keyPairGenerator.generateKeyPair()
@@ -29,36 +29,37 @@ fun signup(
 
     val finalPasswordString = "$username$$password"
     val salt = "1b0c4f19941c073e87cfa55323a6db6d"
-    val pdkdf2key = generateHash( finalPasswordString , salt)
+    val pdkdf2key = generateHash(finalPasswordString, salt)
     vM.encryptedPrivateKey.value = encrypt(privateKeyString, pdkdf2key) as String
-    vM.encryptedPassword.value = encryptMessage(finalPasswordString , vM.publicKeyString.value)
+    vM.encryptedPassword.value = encryptMessage(finalPasswordString, vM.publicKeyString.value)
 
-    val mSocket = sockethandler.getSocket()
+    val mSocket = SocketHandler.getSocket()
     val data = JSONObject()
-    data.put("username",  vM.userName.value)
+    data.put("username", vM.userName.value)
     data.put("publicKey", vM.publicKeyString.value)
     data.put("encryptedPrivateKey", vM.encryptedPrivateKey.value)
     data.put("encryptedPassword", vM.encryptedPassword.value)
 
-    Log.d("login-signup-process" , data.toString())
+    Log.d("login-signup-process", data.toString())
 
     mSocket.emit("sign-up", data)
 
 
     // Handle the "passSignup" event
-    mSocket.on("passSignup") { args ->
+    mSocket.on("passSignup") { _ ->
         println("login-signup-process passed")
         vM.errorType.value = ""
+        vM.saveUserCredentials(context, username, password)
         mainActivity.runOnUiThread {
             navController.navigate("ProfileCreation")
-            Log.d("debug" , "${vM.userName.value} ${vM.password.value}")
+            Log.d("debug", "${vM.userName.value} ${vM.password.value}")
         }
     }
 
     mSocket.on("failSignUp") { args ->
         //val dataReceived = args[0] as JSONObject
         vM.errorType.value = args[0] as String
-        println("login-signup-process ${vM.errorType.value}" )
+        println("login-signup-process ${vM.errorType.value}")
 
     }
 }
@@ -71,8 +72,9 @@ fun login(
     navController: NavController,
     mainActivity: MainActivity,
     vM: ViewModel
-){
-    var mSocket = sockethandler.getSocket()
+) {
+    val context = mainActivity.applicationContext
+    val mSocket = SocketHandler.getSocket()
     val data = JSONObject()
     data.put("username", username)
 
@@ -83,11 +85,12 @@ fun login(
 
         //val dataReceived = args[0] as JSONObject
         vM.errorType.value = "UserNameNotFound"
-        println("login-signup-process ${args[0] as String}" )
+        println("login-signup-process ${args[0] as String}")
 
     }
 
     // Handle the "failSignUp" event
+
     mSocket.on("passLogin") { args ->
         try {
 
@@ -107,22 +110,24 @@ fun login(
                 println("passed $decryptedPassword")
                 vM.errorType.value = ""
 
+                vM.saveUserCredentials(context, username, password)
+
                 // this line is the problem
                 mainActivity.runOnUiThread {
-                    vM.mSocket.emit("give-liked-video-list" , vM.userName.value)
-                    vM.mSocket.emit("give-following-list" , vM.userName.value)
-                    vM.mSocket.emit("give-video-list" , "nothing")
-                    vM.mSocket.emit("give-following-video-list" , vM.userName.value)
+                    vM.mSocket.emit("give-liked-video-list", vM.userName.value)
+                    vM.mSocket.emit("give-following-list", vM.userName.value)
+                    vM.mSocket.emit("give-video-list", "nothing")
+                    vM.mSocket.emit("give-following-video-list", vM.userName.value)
                     navController.navigate("Main")
                 }
             } else {
                 vM.errorType.value = "IncorrectInfo"
-                println("login-signup-process ${vM.errorType.value}" )
+                println("login-signup-process ${vM.errorType.value}")
 
             }
-        }catch(e: Error){
+        } catch (e: Error) {
             vM.errorType.value = "IncorrectInfo"
-            println("login-signup-process ${vM.errorType.value}" )
+            println("login-signup-process ${vM.errorType.value}")
 
         }
     }

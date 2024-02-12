@@ -1,7 +1,6 @@
 package com.example.streamitv1
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
@@ -23,17 +22,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SignupPage(
-    navController: NavController,
-    mainActivity: MainActivity,
-    vM: ViewModel
+    navController: NavController, mainActivity: MainActivity, vM: ViewModel
 ) {
-
 
 
     Column(
@@ -44,12 +39,10 @@ fun SignupPage(
         verticalArrangement = Arrangement.Top
     ) {
         Spacer(modifier = Modifier.height(80.dp))
-        LoginNSignupIconButton(
-            reset = {
-                vM.reset()
-                navController.popBackStack()
-            }
-        )
+        LoginNSignupIconButton(reset = {
+            vM.reset()
+            navController.popBackStack()
+        })
     }
     Column(
         modifier = Modifier
@@ -78,9 +71,7 @@ fun SignupPage(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             LoginNSignupInputField(
-                type  = vM.userName,
-                text = "Enter Username",
-                error = false
+                type = vM.userName, text = "Enter Username", error = false
             )
         }
         Spacer(modifier = Modifier.height(13.dp))
@@ -92,9 +83,9 @@ fun SignupPage(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             LoginNSignupInputField(
-                type  = vM.password,
+                type = vM.password,
                 text = "Enter Password",
-                error = vM.errorType.value=="PasswordMisMatch"
+                error = vM.errorType.value == "PasswordMisMatch"
             )
         }
         Column(
@@ -103,7 +94,7 @@ fun SignupPage(
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.CenterHorizontally
-        ){
+        ) {
             Column(
                 modifier = Modifier
                     .animateContentSize()
@@ -113,9 +104,9 @@ fun SignupPage(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 LoginNSignupInputField(
-                    type  = vM.confirmPassword,
+                    type = vM.confirmPassword,
                     text = "Confirm Password",
-                    error = vM.errorType.value=="PasswordMisMatch"
+                    error = vM.errorType.value == "PasswordMisMatch"
                 )
             }
         }
@@ -135,8 +126,7 @@ fun SignupPage(
             ) {
                 Spacer(modifier = Modifier.width(13.dp))
                 Text(
-                    text =
-                    when (vM.errorType.value) {
+                    text = when (vM.errorType.value) {
                         "UserNameTaken" -> "Username Taken"
                         "IncorrectInfo" -> "Incorrect username or password"
                         "PasswordMisMatch" -> "Password mismatch"
@@ -156,20 +146,20 @@ fun SignupPage(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            LoginNSignupButton(
-                modifier = Modifier
-                    .fillMaxHeight(0.95F)
-                    .fillMaxWidth(0.78F),
+            LoginNSignupButton(modifier = Modifier
+                .fillMaxHeight(0.95F)
+                .fillMaxWidth(0.78F),
                 text = "Signup",
                 onclick = {
-                    if(vM.confirmPassword.value!=vM.password.value){
+                    if (vM.confirmPassword.value != vM.password.value) {
                         vM.errorType.value = "PasswordMisMatch"
-                    }else{
+                    } else {
                         vM.errorType.value = ""
-                        signup(vM.userName.value , vM.password.value,  navController , mainActivity , vM)
+                        signup(
+                            vM.userName.value, vM.password.value, navController, mainActivity, vM
+                        )
                     }
-                }
-            )
+                })
         }
     }
 }

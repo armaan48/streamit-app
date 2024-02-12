@@ -29,8 +29,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,14 +38,12 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 
 @Composable
 fun SearchScreen(
-    navController: NavController,
-    vM: ViewModel
-){
+    navController: NavController, mainActivity: MainActivity, vM: ViewModel
+) {
     val w = LocalConfiguration.current.screenWidthDp.dp
 
     val offsetX by animateDpAsState(
@@ -56,7 +52,7 @@ fun SearchScreen(
         label = ""
     )
 
-    SideOptions(navController,vM)
+    SideOptions(navController, mainActivity, vM)
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -73,8 +69,7 @@ fun SearchScreen(
         ) {
             Spacer(Modifier.height(40.dp))
             TopBar(
-                text = "Search",
-                vM = vM
+                text = "Search", vM = vM
 
             )
             Divider(
@@ -98,13 +93,9 @@ fun SearchScreen(
                     verticalArrangement = Arrangement.Top,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    SearchInputField(
-                        type = vM.searchInput,
-                        text = "Search",
-                        ondone = {
-                            vM.mSocket.emit("give-search-video-list",vM.searchInput.value)
-                        }
-                    )
+                    SearchInputField(type = vM.searchInput, text = "Search", ondone = {
+                        vM.mSocket.emit("give-search-video-list", vM.searchInput.value)
+                    })
 
 
                 }
@@ -118,13 +109,12 @@ fun SearchScreen(
                 Spacer(modifier = Modifier.height(5.dp))
 
                 LazyVerticalGrid(
-                    modifier = Modifier
-                        .fillMaxSize(),
+                    modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Top,
                     horizontalArrangement = Arrangement.Center,
                     columns = GridCells.Adaptive(minSize = 370.dp)
                 ) {
-                    items(vM.searchVideoList.size){
+                    items(vM.searchVideoList.size) {
                         VideoPreview(
                             navController = navController,
                             vM = vM,
@@ -145,16 +135,13 @@ fun SearchScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchInputField(
-    type : MutableState<String>,
-    text : String,
-    ondone: ()->Unit
-){
+    type: MutableState<String>, text: String, ondone: () -> Unit
+) {
     val color = MaterialTheme.colorScheme.tertiary
     val color2 = MaterialTheme.colorScheme.onTertiary
-    OutlinedTextField(
-        modifier = Modifier
-            .fillMaxHeight(0.95F)
-            .fillMaxWidth(0.84F),
+    OutlinedTextField(modifier = Modifier
+        .fillMaxHeight(0.95F)
+        .fillMaxWidth(0.84F),
         value = type.value,
         onValueChange = { type.value = it },
         singleLine = true,
@@ -164,19 +151,15 @@ fun SearchInputField(
             focusedLabelColor = Color.Red,
             unfocusedLabelColor = Color.Red
         ),
-        keyboardActions = KeyboardActions(
-            onDone = {
-                ondone()
-            }
-        ),
+        keyboardActions = KeyboardActions(onDone = {
+            ondone()
+        }),
         textStyle = TextStyle(
             fontSize = 12.sp
         ),
         label = {
             Text(
-                modifier=Modifier.padding(2.dp),
-                text = text,
-                color = color2
+                modifier = Modifier.padding(2.dp), text = text, color = color2
             )
         },
         shape = RoundedCornerShape(4.dp),
@@ -188,9 +171,9 @@ fun SearchInputField(
                     .clickable {
 
                     },
-                painter = painterResource(R.drawable.search_icon), contentDescription = "back_arrow_icon_light",
+                painter = painterResource(R.drawable.search_icon),
+                contentDescription = "back_arrow_icon_light",
                 tint = MaterialTheme.colorScheme.secondary
             )
-        }
-    )
+        })
 }

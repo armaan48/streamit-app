@@ -16,23 +16,33 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun LoginPage(
-    navController : NavController,
-    mainActivity: MainActivity,
-    vM: ViewModel
+    navController: NavController, mainActivity: MainActivity, vM: ViewModel
 ) {
+    val context = mainActivity.applicationContext
 
+    val username by UserPreferences.getUserName(context).collectAsState(initial = "")
+    val password by UserPreferences.getPassword(context).collectAsState(initial = "")
 
+    LaunchedEffect(username) { // Use username as a key
+        if (username != "" && password != "") {
+            vM.userName.value = username.toString()
+            vM.password.value = password.toString()
+            login(vM.userName.value, vM.password.value, navController, mainActivity, vM)
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -61,9 +71,9 @@ fun LoginPage(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             LoginNSignupInputField(
-                type  = vM.userName,
+                type = vM.userName,
                 text = "Enter Username",
-                error = (vM.errorType.value=="UserNameTaken")
+                error = (vM.errorType.value == "UserNameTaken")
             )
         }
         Spacer(modifier = Modifier.height(13.dp))
@@ -75,10 +85,10 @@ fun LoginPage(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             LoginNSignupInputField(
-                type  = vM.password,
+                type = vM.password,
                 text = "Enter Password",
-                error =(vM.errorType.value=="IncorrectInfo"),
-                )
+                error = (vM.errorType.value == "IncorrectInfo"),
+            )
         }
         Row(
             modifier = Modifier
@@ -96,12 +106,12 @@ fun LoginPage(
             ) {
                 Spacer(modifier = Modifier.width(13.dp))
                 Text(
-                    text =
-                    when (vM.errorType.value) {
+                    text = when (vM.errorType.value) {
                         "UserNameNotFound" -> "Username not found"
                         "IncorrectInfo" -> "Incorrect username or password"
                         "PasswordMisMatch" -> "Password mismatch"
-                        else -> "" },
+                        else -> ""
+                    },
                     fontSize = 10.sp,
                     color = MaterialTheme.colorScheme.onError,
                     fontWeight = FontWeight.Normal,
@@ -116,15 +126,13 @@ fun LoginPage(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            LoginNSignupButton(
-                modifier = Modifier
-                    .fillMaxHeight(0.95F)
-                    .fillMaxWidth(0.78F),
+            LoginNSignupButton(modifier = Modifier
+                .fillMaxHeight(0.95F)
+                .fillMaxWidth(0.78F),
                 text = "Log in",
                 onclick = {
-                    login(vM.userName.value , vM.password.value , navController , mainActivity , vM)
-                }
-            )
+                    login(vM.userName.value, vM.password.value, navController, mainActivity, vM)
+                })
         }
         Row(
             modifier = Modifier
@@ -132,13 +140,12 @@ fun LoginPage(
                 .height(60.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
-        ){
+        ) {
             Row(
-                modifier = Modifier
-                    .fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
-            ){
+            ) {
                 Text(
                     text = "Don't have an account? ",
                     color = MaterialTheme.colorScheme.tertiary,
@@ -146,10 +153,10 @@ fun LoginPage(
                     fontSize = 13.sp
                 )
                 Text(
-                    modifier = Modifier
-                        .clickable{
+                    modifier = Modifier.clickable {
                             vM.reset()
-                            navController.navigate("Signup") },
+                            navController.navigate("Signup")
+                        },
                     text = "Sign up",
                     color = MaterialTheme.colorScheme.secondary,
                     fontWeight = FontWeight.Bold,

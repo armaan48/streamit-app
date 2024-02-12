@@ -1,6 +1,5 @@
 package com.example.streamitv1
 
-import android.util.Log
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -26,13 +25,10 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Divider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,16 +39,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.streamitv1.ui.theme.rosarioFamily
 
 @Composable
 fun FollowingListView(
-    navController: NavController,
-    vM: ViewModel
-){
+    navController: NavController, mainActivity: MainActivity, vM: ViewModel
+) {
     val w = LocalConfiguration.current.screenWidthDp.dp
 
     val offsetX by animateDpAsState(
@@ -61,7 +55,7 @@ fun FollowingListView(
         label = ""
     )
 
-    SideOptions(navController,vM)
+    SideOptions(navController, mainActivity, vM)
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -78,8 +72,7 @@ fun FollowingListView(
         ) {
             Spacer(Modifier.height(40.dp))
             TopBar(
-                text = "Following",
-                vM = vM
+                text = "Following", vM = vM
             )
             Divider(
                 modifier = Modifier.fillMaxWidth(0.95F),
@@ -95,7 +88,7 @@ fun FollowingListView(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                items(vM.followingList.value.toList()){
+                items(vM.followingList.value.toList()) {
                     FollowerList(it)
                 }
             }
@@ -131,8 +124,7 @@ fun FollowerList(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+                modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
             ) {
                 Box(
                     modifier = Modifier
@@ -171,9 +163,8 @@ fun FollowerList(
 
 @Composable
 fun MainFollow(
-    navController: NavController,
-    vM: ViewModel
-){
+    navController: NavController, mainActivity: MainActivity, vM: ViewModel
+) {
     val w = LocalConfiguration.current.screenWidthDp.dp
 
     val offsetX by animateDpAsState(
@@ -182,7 +173,7 @@ fun MainFollow(
         label = ""
     )
 
-    SideOptions(navController,vM)
+    SideOptions(navController, mainActivity, vM)
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -199,8 +190,7 @@ fun MainFollow(
         ) {
             Spacer(Modifier.height(40.dp))
             TopBar(
-                text = "Following",
-                vM = vM
+                text = "Following", vM = vM
             )
             Divider(
                 modifier = Modifier.fillMaxWidth(0.95F),
@@ -220,13 +210,13 @@ fun MainFollow(
                         .height(60.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
-                ){
+                ) {
                     Spacer(modifier = Modifier.width(20.dp))
                     Row(
                         modifier = Modifier
                             .weight(1F)
                             .fillMaxHeight(),
-                    ){
+                    ) {
                         FollowList(vM)
                     }
                     Column(
@@ -238,14 +228,11 @@ fun MainFollow(
                             },
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
-                    ){
+                    ) {
                         Text(
-                            modifier = Modifier
-                                .clickable {
+                            modifier = Modifier.clickable {
                                     navController.navigate("FollowerList")
-                                },
-                            text = "All",
-                            color = MaterialTheme.colorScheme.secondary
+                                }, text = "All", color = MaterialTheme.colorScheme.secondary
                         )
                     }
                 }
@@ -255,13 +242,12 @@ fun MainFollow(
                     color = MaterialTheme.colorScheme.tertiary
                 )
                 LazyVerticalGrid(
-                    modifier = Modifier
-                        .fillMaxSize(),
+                    modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Top,
                     horizontalArrangement = Arrangement.Center,
                     columns = GridCells.Adaptive(minSize = 370.dp)
                 ) {
-                    items(vM.followingVideoList.size){
+                    items(vM.followingVideoList.size) {
                         VideoPreview(
                             navController = navController,
                             vM = vM,
@@ -281,15 +267,14 @@ fun MainFollow(
 
 @Composable
 fun FollowList(
-    vM:ViewModel
+    vM: ViewModel
 ) {
     LazyRow(
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start
     ) {
-        items(vM.followingList.value.toList()){
+        items(vM.followingList.value.toList()) {
             FollowListIcon(it)
         }
     }
@@ -297,8 +282,8 @@ fun FollowList(
 
 @Composable
 fun FollowListIcon(
-    user:UserDetail
-){
+    user: UserDetail
+) {
     Column(
         modifier = Modifier
             .fillMaxHeight()
@@ -307,9 +292,8 @@ fun FollowListIcon(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ){
+            modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+        ) {
             Box(
                 modifier = Modifier
                     .height(40.dp)

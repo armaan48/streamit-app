@@ -51,6 +51,8 @@ android {
 }
 
 dependencies {
+    implementation("androidx.datastore:datastore-preferences:1.0.0-alpha06")
+
     val navVersion = "2.7.6"
     // Java language implementation
     implementation("androidx.navigation:navigation-fragment:$navVersion")

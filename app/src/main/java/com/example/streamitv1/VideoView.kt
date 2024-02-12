@@ -1,10 +1,12 @@
 package com.example.streamitv1
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.activity.compose.BackHandler
 import androidx.annotation.OptIn
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
@@ -48,9 +50,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -68,27 +70,28 @@ import androidx.compose.ui.unit.times
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
-import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.analytics.AnalyticsListener
-import androidx.media3.exoplayer.analytics.PlaybackStats
-import androidx.media3.exoplayer.analytics.PlaybackStatsListener
 import androidx.media3.ui.PlayerView
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.streamitv1.ui.theme.rosarioFamily
+import kotlinx.coroutines.delay
 import org.json.JSONObject
 
 
-@OptIn(UnstableApi::class) @Composable
+@SuppressLint("SourceLockedOrientationActivity")
+@OptIn(UnstableApi::class)
+@Composable
 fun VideoView(
     navController: NavController,
+    mainActivity: MainActivity,
     vM: ViewModel,
-    video: VideoDetail
+    video: VideoDetail,
+    onclick: (type: Int) -> Unit
 ) {
     val context = LocalContext.current
-    vM.exoPlayer = remember{
+    vM.exoPlayer = remember {
         ExoPlayer.Builder(context).build().apply {
             setMediaItem(
                 MediaItem.fromUri(
@@ -96,10 +99,13 @@ fun VideoView(
                 )
             )
             prepare()
-            playWhenReady = true
+            playWhenReady = vM.isPlaying.value
         }
     }
-    vM.isPlaying.value = true
+
+    LaunchedEffect(vM.exoPlayer) {
+        vM.exoPlayer!!.seekTo(vM.currentPosition.longValue)
+    }
 
     val w = LocalConfiguration.current.screenWidthDp.dp
     val h = LocalConfiguration.current.screenHeightDp.dp
@@ -120,6 +126,20 @@ fun VideoView(
     )
 
     val configuration = LocalConfiguration.current
+    val activity = LocalContext.current as Activity
+
+    BackHandler(
+        enabled = (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
+    ) {
+        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+    }
+
+    if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        onclick(2)
+    } else {
+        onclick(1)
+    }
 
     when (configuration.orientation) {
         Configuration.ORIENTATION_LANDSCAPE -> {
@@ -131,9 +151,10 @@ fun VideoView(
                         vM.videoFocused.value = !vM.videoFocused.value
                     }
             ) {
-                DisposableEffect(key1 = Unit) { onDispose {
-                    vM.exoPlayer?.release()
-                }
+                DisposableEffect(key1 = Unit) {
+                    onDispose {
+                        vM.exoPlayer?.release()
+                    }
                 }
                 AndroidView(
                     factory = {
@@ -147,20 +168,31 @@ fun VideoView(
                         }
                     }
                 )
-                VideoControls(
-                    exoPlayer = vM.exoPlayer!!,
-                    vM = vM,
-                    run = {
-                        vM.videoFocused.value = !vM.videoFocused.value
-                    },
-                    configuration = configuration,
-                    settingControl = settingState
-                )
+                Column {
+                    AnimatedVisibility(
+                        visible = vM.videoFocused.value,
+                        enter = EnterTransition.None,
+                        exit = ExitTransition.None
+                    ) {
+                        VideoControls(
+                            exoPlayer = vM.exoPlayer!!,
+                            vM = vM,
+                            run = {
+                                vM.videoFocused.value = !vM.videoFocused.value
+                            },
+                            configuration = configuration,
+                            settingControl = settingState,
+                            type = "Fullscreen"
+                        )
+                    }
+                }
             }
         }
+
         else -> {
             SideOptions(
                 navController = navController,
+                mainActivity = mainActivity,
                 vM = vM
             )
             Column(
@@ -177,7 +209,6 @@ fun VideoView(
                     verticalArrangement = Arrangement.Top,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Spacer(Modifier.height(40.dp))
                     TopBar(
                         text = "Stream it",
                         vM = vM
@@ -191,8 +222,10 @@ fun VideoView(
                             }
 
                     ) {
-                        DisposableEffect(key1 = Unit) { onDispose {
-                            vM.exoPlayer?.release() }
+                        DisposableEffect(key1 = Unit) {
+                            onDispose {
+                                vM.exoPlayer?.release()
+                            }
                         }
                         AndroidView(
                             factory = {
@@ -211,7 +244,7 @@ fun VideoView(
                                 visible = vM.videoFocused.value,
                                 enter = EnterTransition.None,
                                 exit = ExitTransition.None
-                            ){
+                            ) {
                                 VideoControls(
                                     exoPlayer = vM.exoPlayer!!,
                                     vM = vM,
@@ -219,7 +252,8 @@ fun VideoView(
                                         vM.videoFocused.value = !vM.videoFocused.value
                                     },
                                     configuration = configuration,
-                                    settingControl = settingState
+                                    settingControl = settingState,
+                                    type = "Normal"
                                 )
                             }
                         }
@@ -273,7 +307,8 @@ fun VideoView(
                                     Text(
                                         modifier = Modifier
                                             .clickable {
-                                                vM.descriptionExtended.value = !vM.descriptionExtended.value
+                                                vM.descriptionExtended.value =
+                                                    !vM.descriptionExtended.value
                                             },
                                         text = "...more",
                                         fontFamily = rosarioFamily,
@@ -285,16 +320,22 @@ fun VideoView(
                             }
                             AnimatedVisibility(
                                 vM.descriptionExtended.value,
-                                enter = expandVertically(animationSpec = tween(durationMillis = 200), expandFrom = Alignment.Top) { 60 } + fadeIn(),
-                                exit = shrinkVertically(animationSpec = tween(durationMillis = 200), shrinkTowards = Alignment.Bottom) { 0 } + fadeOut()
-                            ){
+                                enter = expandVertically(
+                                    animationSpec = tween(durationMillis = 200),
+                                    expandFrom = Alignment.Top
+                                ) { 60 } + fadeIn(),
+                                exit = shrinkVertically(
+                                    animationSpec = tween(durationMillis = 200),
+                                    shrinkTowards = Alignment.Bottom
+                                ) { 0 } + fadeOut()
+                            ) {
                                 Column(
                                     modifier = Modifier
                                         .height(73.dp)
                                         .fillMaxWidth(),
                                     verticalArrangement = Arrangement.Bottom,
                                     horizontalAlignment = Alignment.CenterHorizontally
-                                ){
+                                ) {
                                     Column(
                                         modifier = Modifier
                                             .animateContentSize()
@@ -334,7 +375,7 @@ fun VideoView(
                                         Box(
                                             modifier = Modifier.fillMaxSize(),
                                             contentAlignment = Alignment.Center
-                                        ){
+                                        ) {
                                             Box(
                                                 modifier = Modifier
                                                     .height(40.dp)
@@ -377,16 +418,16 @@ fun VideoView(
                                 ) {
                                     VideoViewButton(
                                         image = R.drawable.like_icon,
-                                        text =  if (vM.followingList.value.contains(video.author)) "Unsubscribe" else "Subscribe",
+                                        text = if (vM.followingList.value.contains(video.author)) "Unsubscribe" else "Subscribe",
                                         onclick = {
-                                            val data = JSONObject();
-                                            data.put("follower_id" , vM.userName.value)
-                                            data.put("following_id",video.author.username)
-                                            if (vM.followingList.value.contains(video.author)){
-                                                vM.mSocket.emit("unfollow" , data)
+                                            val data = JSONObject()
+                                            data.put("follower_id", vM.userName.value)
+                                            data.put("following_id", video.author.username)
+                                            if (vM.followingList.value.contains(video.author)) {
+                                                vM.mSocket.emit("unfollow", data)
                                                 vM.removeFollowing(video.author)
-                                            }else{
-                                                vM.mSocket.emit("follow" , data)
+                                            } else {
+                                                vM.mSocket.emit("follow", data)
                                                 vM.addFollowing(video.author)
                                             }
                                         }
@@ -409,16 +450,16 @@ fun VideoView(
                                 ) {
                                     VideoViewButton(
                                         image = R.drawable.like_icon,
-                                        text =  if (vM.likedVideoList.value.contains(video.id)) "Unlike" else "Like",
+                                        text = if (vM.likedVideoList.value.contains(video.id)) "Unlike" else "Like",
                                         onclick = {
-                                            val data = JSONObject();
-                                            data.put("user_id" , vM.userName.value)
-                                            data.put("video_id" ,video.id)
-                                            if (vM.likedVideoList.value.contains(video.id)){
-                                                vM.mSocket.emit("unlike" , data)
+                                            val data = JSONObject()
+                                            data.put("user_id", vM.userName.value)
+                                            data.put("video_id", video.id)
+                                            if (vM.likedVideoList.value.contains(video.id)) {
+                                                vM.mSocket.emit("unlike", data)
                                                 vM.unlikeVideo(video.id)
-                                            }else{
-                                                vM.mSocket.emit("like" , data)
+                                            } else {
+                                                vM.mSocket.emit("like", data)
                                                 vM.likeVideo(video.id)
                                             }
                                         }
@@ -471,7 +512,7 @@ fun VideoView(
                         horizontalArrangement = Arrangement.Center,
                         columns = GridCells.Adaptive(minSize = 370.dp)
                     ) {
-                        items(vM.videoList.size){
+                        items(vM.videoList.size) {
                             if (vM.videoList[it].id != video.id) {
                                 VideoPreview(
                                     navController = navController,
@@ -505,14 +546,16 @@ fun VideoView(
                     settingType.value = "Main"
                 },
             contentAlignment = Alignment.BottomCenter
-        ){
+        ) {
             when (settingType.value) {
                 "Main" -> {
                     MainSettingOptions(settingType)
                 }
+
                 "Quality" -> {
                     QualitySettingOptions()
                 }
+
                 else -> {
                     SpeedSettingOptions()
                 }
@@ -522,7 +565,7 @@ fun VideoView(
 }
 
 @Composable
-fun SpeedSettingOptions(){
+fun SpeedSettingOptions() {
     LazyColumn(
         modifier = Modifier
             .height(200.dp)
@@ -537,80 +580,80 @@ fun SpeedSettingOptions(){
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        item{
+        item {
             Spacer(modifier = Modifier.height(10.dp))
         }
-        item{
+        item {
             SettingOption(
                 text = "0.25x",
                 isSelected = true,
                 onclick = {}
             )
         }
-        item{
+        item {
             Spacer(modifier = Modifier.height(10.dp))
         }
-        item{
+        item {
             SettingOption(
                 text = "0.5x",
                 isSelected = false,
                 onclick = {}
             )
         }
-        item{
+        item {
             Spacer(modifier = Modifier.height(10.dp))
         }
-        item{
+        item {
             SettingOption(
                 text = "0.75x",
                 isSelected = false,
                 onclick = {}
             )
         }
-        item{
+        item {
             Spacer(modifier = Modifier.height(10.dp))
         }
-        item{
+        item {
             SettingOption(
                 text = "Normal",
                 isSelected = false,
                 onclick = {}
             )
         }
-        item{
+        item {
             Spacer(modifier = Modifier.height(10.dp))
         }
-        item{
+        item {
             SettingOption(
                 text = "1.25x",
                 isSelected = false,
                 onclick = {}
             )
         }
-        item{
+        item {
             Spacer(modifier = Modifier.height(10.dp))
         }
-        item{
+        item {
             SettingOption(
                 text = "1.5x",
                 isSelected = false,
                 onclick = {}
             )
         }
-        item{
+        item {
             Spacer(modifier = Modifier.height(10.dp))
         }
-        item{
+        item {
             SettingOption(
                 text = "1.75x",
                 isSelected = false,
                 onclick = {}
             )
         }
-        item{
+        item {
             Spacer(modifier = Modifier.height(10.dp))
         }
-        item{
+        item {
             SettingOption(
                 text = "2x",
                 isSelected = false,
@@ -621,7 +664,7 @@ fun SpeedSettingOptions(){
 }
 
 @Composable
-fun QualitySettingOptions(){
+fun QualitySettingOptions() {
     LazyColumn(
         modifier = Modifier
             .height(200.dp)
@@ -636,50 +679,50 @@ fun QualitySettingOptions(){
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        item{
+        item {
             Spacer(modifier = Modifier.height(10.dp))
         }
-        item{
+        item {
             SettingOption(
                 text = "Auto",
                 isSelected = true,
                 onclick = {}
             )
         }
-        item{
+        item {
             Spacer(modifier = Modifier.height(10.dp))
         }
-        item{
+        item {
             SettingOption(
                 text = "360P",
                 isSelected = false,
                 onclick = {}
             )
         }
-        item{
+        item {
             Spacer(modifier = Modifier.height(10.dp))
         }
-        item{
+        item {
             SettingOption(
                 text = "480P",
                 isSelected = false,
                 onclick = {}
             )
         }
-        item{
+        item {
             Spacer(modifier = Modifier.height(10.dp))
         }
-        item{
+        item {
             SettingOption(
                 text = "720P",
                 isSelected = false,
                 onclick = {}
             )
         }
-        item{
+        item {
             Spacer(modifier = Modifier.height(10.dp))
         }
-        item{
+        item {
             SettingOption(
                 text = "1080P",
                 isSelected = false,
@@ -692,7 +735,7 @@ fun QualitySettingOptions(){
 @Composable
 fun MainSettingOptions(
     settingType: MutableState<String>
-){
+) {
     LazyColumn(
         modifier = Modifier
             .height(200.dp)
@@ -707,31 +750,31 @@ fun MainSettingOptions(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        item{
+        item {
             Spacer(modifier = Modifier.height(10.dp))
         }
-        item{
+        item {
             SettingOption(
                 text = "Playback speed",
                 isSelected = false,
                 onclick = {
-                    settingType.value = "Speed";
+                    settingType.value = "Speed"
                 }
             )
         }
-        item{
+        item {
             Spacer(modifier = Modifier.height(10.dp))
         }
-        item{
+        item {
             SettingOption(
                 text = "Quality",
                 isSelected = false,
                 onclick = {
-                    settingType.value = "Quality";
+                    settingType.value = "Quality"
                 }
             )
         }
-        item{
+        item {
             Spacer(modifier = Modifier.height(10.dp))
         }
     }
@@ -739,10 +782,10 @@ fun MainSettingOptions(
 
 @Composable
 fun SettingOption(
-    text : String,
-    isSelected : Boolean,
-    onclick : ()->Unit
-){
+    text: String,
+    isSelected: Boolean,
+    onclick: () -> Unit
+) {
     Row(
         modifier = Modifier
             .height(40.dp)
@@ -761,18 +804,19 @@ fun SettingOption(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
-            if(isSelected){
+            if (isSelected) {
                 Icon(
                     modifier = Modifier
                         .height(25.dp)
                         .aspectRatio(1F),
-                    painter = painterResource(R.drawable.tick_icon), contentDescription = "back_arrow_icon_light",
+                    painter = painterResource(R.drawable.tick_icon),
+                    contentDescription = "back_arrow_icon_light",
                     tint = MaterialTheme.colorScheme.secondary
                 )
             }
         }
         Text(
-            text = text ,
+            text = text,
             fontFamily = rosarioFamily,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.secondary
@@ -785,7 +829,7 @@ fun VideoViewButton(
     image: Int,
     text: String,
     onclick: () -> Unit
-){
+) {
     Button(
         modifier = Modifier
             .fillMaxHeight(0.95F)
@@ -805,7 +849,7 @@ fun VideoViewButton(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            if(image!=-1){
+            if (image != -1) {
                 Icon(
                     modifier = Modifier
                         .height(40.dp)
@@ -832,30 +876,39 @@ fun VideoViewButton(
     }
 }
 
-@OptIn(UnstableApi::class) @Composable
+@SuppressLint("SourceLockedOrientationActivity")
+@OptIn(UnstableApi::class)
+@Composable
 fun VideoControls(
-    exoPlayer : ExoPlayer,
-    vM : ViewModel,
+    exoPlayer: ExoPlayer,
+    vM: ViewModel,
     run: () -> Unit,
-    configuration : Configuration,
-    settingControl : MutableState<Boolean>
+    configuration: Configuration,
+    settingControl: MutableState<Boolean>,
+    type: String
 ) {
     val activity = LocalContext.current as Activity
 
-    val currentPosition = remember { mutableLongStateOf(0L) }
-
     DisposableEffect(key1 = exoPlayer) {
         val listener = object : Player.Listener {
-            @Deprecated("Deprecated in Java",
+            @Deprecated(
+                "Deprecated in Java",
                 ReplaceWith("currentPosition.value = exoPlayer.currentPosition")
             )
             override fun onPositionDiscontinuity(reason: Int) {
-                currentPosition.longValue = exoPlayer.currentPosition
+                vM.currentPosition.longValue = exoPlayer.currentPosition
             }
         }
         exoPlayer.addListener(listener)
         onDispose {
             exoPlayer.removeListener(listener)
+        }
+    }
+
+    LaunchedEffect(exoPlayer) {
+        while (true) {
+            vM.currentPosition.longValue = exoPlayer.currentPosition
+            delay(500)
         }
     }
 
@@ -866,145 +919,179 @@ fun VideoControls(
             .clickable {
                 run()
             },
-        verticalArrangement = Arrangement.SpaceBetween,
+        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
-    ){
-        Row(
+    ) {
+        Column(
             modifier = Modifier
-                .height(50.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.End
+                .fillMaxWidth()
+                .weight(1F)
+                .background(Color.Black.copy(alpha = 0.2f))
+                .clickable {
+                    run()
+                },
+            verticalArrangement = Arrangement.SpaceBetween,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.width(20.dp))
-            ControlIcon(
-                draw = R.drawable.settings_icon,
-                run = {
-                    settingControl.value = true
-                },
-                sz = if(configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
-                { 35 } else{ 25 }
-            )
-            Spacer(modifier = Modifier.width(20.dp))
-        }
-        Row(
-            modifier = Modifier
-                .height(50.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            ControlIcon(
-                draw = R.drawable.replay_10_icon,
-                run = {
-                    exoPlayer.seekTo(exoPlayer.currentPosition - 10_000)
-                },
-                sz = if(configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
-                { 40 } else{ 30 }
-            )
-            Spacer(modifier = Modifier.width(20.dp))
-            ControlIcon(
-                draw = if (vM.isPlaying.value) {
-                    R.drawable.pause_icon
-                } else {
-                    R.drawable.play_icon
-                },
-                run = {
-                    if (exoPlayer.isPlaying) {
-                        vM.isPlaying.value = !vM.isPlaying.value
-                        exoPlayer.pause()
-                    } else {
-                        vM.isPlaying.value =!vM.isPlaying.value
-                        exoPlayer.play()
-                    }
-                },
-                sz = if(configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
-                { 40 } else{ 30 }
-            )
-            Spacer(modifier = Modifier.width(20.dp))
-            ControlIcon(
-                draw = R.drawable.forward_10_icon,
-                run = {
-                    exoPlayer.seekTo(exoPlayer.currentPosition + 10_000)
-                },
-                sz = if(configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
-                { 40 } else{ 30 }
-            )
-        }
-        Row(
-            modifier = Modifier
-                .height(50.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Spacer(modifier = Modifier.width(10.dp))
-            Column(
+            Row(
                 modifier = Modifier
-                    .fillMaxHeight()
-                    .weight(1F)
-                    .clickable {
-                    },
-                verticalArrangement = Arrangement.Bottom,
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .height(50.dp)
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.End
             ) {
-                Box(
+                Spacer(modifier = Modifier.width(20.dp))
+                ControlIcon(
+                    draw = R.drawable.settings_icon,
+                    run = {
+                        settingControl.value = true
+                    },
+                    sz = if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                        35
+                    } else {
+                        25
+                    }
+                )
+                Spacer(modifier = Modifier.width(20.dp))
+            }
+            Row(
+                modifier = Modifier
+                    .height(50.dp)
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                ControlIcon(
+                    draw = R.drawable.replay_10_icon,
+                    run = {
+                        exoPlayer.seekTo(exoPlayer.currentPosition - 10_000)
+                    },
+                    sz = if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                        40
+                    } else {
+                        30
+                    }
+                )
+                Spacer(modifier = Modifier.width(20.dp))
+                ControlIcon(
+                    draw = if (vM.isPlaying.value) {
+                        R.drawable.pause_icon
+                    } else {
+                        R.drawable.play_icon
+                    },
+                    run = {
+                        if (exoPlayer.isPlaying) {
+                            vM.isPlaying.value = !vM.isPlaying.value
+                            exoPlayer.pause()
+                        } else {
+                            vM.isPlaying.value = !vM.isPlaying.value
+                            exoPlayer.play()
+                        }
+                    },
+                    sz = if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                        40
+                    } else {
+                        30
+                    }
+                )
+                Spacer(modifier = Modifier.width(20.dp))
+                ControlIcon(
+                    draw = R.drawable.forward_10_icon,
+                    run = {
+                        exoPlayer.seekTo(exoPlayer.currentPosition + 10_000)
+                    },
+                    sz = if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                        40
+                    } else {
+                        30
+                    }
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .height(50.dp)
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Spacer(modifier = Modifier.width(10.dp))
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(10.dp)
-                        .padding(horizontal = 20.dp)
+                        .fillMaxHeight()
+                        .weight(1F)
+                        .clickable {
+                        },
+                    verticalArrangement = Arrangement.Bottom,
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    val progress = (currentPosition.longValue.toFloat() / exoPlayer.duration).coerceIn(0f, 1f)
-
-                    LinearProgressIndicator(
-                        progress = progress,
-                        color = MaterialTheme.colorScheme.primary,
-                        trackColor = Color.Gray,
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .pointerInput(Unit) {
-                                detectTapGestures(
-                                    onPress = { offset ->
-                                        val position = (offset.x / size.width) * exoPlayer.duration
-                                        exoPlayer.seekTo(position.toLong())
-                                    }
-                                )
-                            }
-                    )
+                            .height(10.dp)
+                            .padding(horizontal = 20.dp)
+                    ) {
+                        val progress =
+                            (vM.currentPosition.longValue.toFloat() / exoPlayer.duration).coerceIn(
+                                0f,
+                                1f
+                            )
+                        LinearProgressIndicator(
+                            progress = progress,
+                            color = MaterialTheme.colorScheme.primary,
+                            trackColor = Color.Gray,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .pointerInput(Unit) {
+                                    detectTapGestures(
+                                        onPress = { offset ->
+                                            val position =
+                                                (offset.x / size.width) * exoPlayer.duration
+                                            exoPlayer.seekTo(position.toLong())
+                                        }
+                                    )
+                                }
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.width(10.dp))
+                ControlIcon(
+                    draw = R.drawable.fullscreen_icon,
+                    run = {
+                        if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                            activity.requestedOrientation =
+                                ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                        } else {
+                            activity.requestedOrientation =
+                                ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                        }
+                    },
+                    sz = if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                        35
+                    } else {
+                        25
+                    }
+                )
+                Spacer(modifier = Modifier.width(30.dp))
             }
-            Spacer(modifier = Modifier.width(10.dp))
-            ControlIcon(
-                draw = R.drawable.fullscreen_icon,
-                run = {
-                    if(configuration.orientation == Configuration.ORIENTATION_LANDSCAPE){
-                        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-                    }
-                    else{
-                        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-                    }
-                },
-                sz = if(configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
-                { 30 } else{ 20 }
-            )
-            Spacer(modifier = Modifier.width(20.dp))
         }
+        if (type == "Fullscreen") Spacer(modifier = Modifier.height(25.dp))
     }
 }
 
 @Composable
 fun ControlIcon(
-    draw : Int,
-    run : () -> Unit,
-    sz : Int
+    draw: Int,
+    run: () -> Unit,
+    sz: Int
 ) {
     Icon(
         modifier = Modifier
             .height(sz.dp)
             .aspectRatio(1F)
             .clickable { run() },
-        painter = painterResource( draw ),
+        painter = painterResource(draw),
         contentDescription = "",
         tint = MaterialTheme.colorScheme.secondary
     )
