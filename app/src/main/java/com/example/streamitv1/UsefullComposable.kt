@@ -557,7 +557,7 @@ fun SideOptions(
                 if (!vM.isOffsetEnabled.value) {
                     vM.saveUserCredentials(context, "", "")
                     vM.isOffsetEnabled.value = !vM.isOffsetEnabled.value
-                    navController.navigate("LoginSection")
+                    navController.navigate("Login")
                 }
             })
             Spacer(modifier = Modifier.height(40.dp))

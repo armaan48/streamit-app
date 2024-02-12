@@ -7,6 +7,9 @@ import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -15,6 +18,7 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.streamitv1.ui.theme.StreamitTheme
+import kotlinx.coroutines.delay
 import org.json.JSONObject
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -33,6 +37,7 @@ class MainActivity : ComponentActivity() {
                         View.SYSTEM_UI_FLAG_IMMERSIVE
             }
         }
+        val context = this@MainActivity.applicationContext
 
         fun exitFullscreen() {
             println("type:::exit")
@@ -41,18 +46,37 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
             val vM: ViewModel = viewModel()
+
+            val username by UserPreferences.getUserName(context).collectAsState(initial = "")
+            val password by UserPreferences.getPassword(context).collectAsState(initial = "")
+
+            LaunchedEffect(username) {
+                delay(1000)
+                if (username.toString().isNotBlank() && password.toString().isNotBlank()) {
+                    vM.userName.value = username.toString()
+                    vM.password.value = password.toString()
+                    login(vM.userName.value, vM.password.value, navController, this@MainActivity, vM)
+                } else {
+                    navController.navigate("Login") // Navigate to LoginPage if username or password is blank
+                }
+            }
             StreamitTheme {
                 NavHost(
                     navController = navController,
-                    startDestination = "Login"
+                    startDestination = "Load"
                 ) {
+                    composable(
+                        route = "Load"
+                    ) {
+                        LoadingPage()
+                    }
                     composable(
                         route = "Login"
                     ) {
                         LoginPage(
                             navController = navController,
                             mainActivity = this@MainActivity,
-                           vM = vM
+                            vM = vM
                         )
                     }
                     composable("ProfileCreation") {

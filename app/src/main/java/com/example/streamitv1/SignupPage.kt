@@ -29,8 +29,6 @@ import androidx.navigation.NavController
 fun SignupPage(
     navController: NavController, mainActivity: MainActivity, vM: ViewModel
 ) {
-
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -130,6 +128,7 @@ fun SignupPage(
                         "UserNameTaken" -> "Username Taken"
                         "IncorrectInfo" -> "Incorrect username or password"
                         "PasswordMisMatch" -> "Password mismatch"
+                        "InvalidEntry" -> "Invalid Entry"
                         else -> ""
                     },
                     fontSize = 10.sp,
@@ -153,13 +152,17 @@ fun SignupPage(
                 onclick = {
                     if (vM.confirmPassword.value != vM.password.value) {
                         vM.errorType.value = "PasswordMisMatch"
-                    } else {
+                    }
+                    else if(vM.userName.value=="" || vM.password.value=="" || vM.userName.value=="null" || vM.password.value=="null"){
+                        vM.errorType.value = "InvalidEntry"
+                    }else {
                         vM.errorType.value = ""
                         signup(
                             vM.userName.value, vM.password.value, navController, mainActivity, vM
                         )
                     }
-                })
+                }
+            )
         }
     }
 }
