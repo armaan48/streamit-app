@@ -1,5 +1,6 @@
 package com.example.streamitv1
 
+import LoadingPage
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -43,8 +44,7 @@ class MainActivity : ComponentActivity() {
             StreamitTheme {
                 NavHost(
                     navController = navController,
-                    startDestination = "Login",
-                    route = "LoginSection"
+                    startDestination = "Login"
                 ) {
                     composable(
                         route = "Login"
@@ -52,7 +52,7 @@ class MainActivity : ComponentActivity() {
                         LoginPage(
                             navController = navController,
                             mainActivity = this@MainActivity,
-                            vM = vM
+                           vM = vM
                         )
                     }
                     composable("ProfileCreation") {
