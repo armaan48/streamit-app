@@ -52,12 +52,12 @@ class MainActivity : ComponentActivity() {
 
             LaunchedEffect(username) {
                 delay(1000)
-                if (username.toString().isNotBlank() && password.toString().isNotBlank()) {
+                if (username.toString()!="" && password.toString()!="" && username.toString()!="null" && password.toString()!="null") {
                     vM.userName.value = username.toString()
                     vM.password.value = password.toString()
                     login(vM.userName.value, vM.password.value, navController, this@MainActivity, vM)
                 } else {
-                    navController.navigate("Login") // Navigate to LoginPage if username or password is blank
+                    navController.navigate("Login")
                 }
             }
             StreamitTheme {
