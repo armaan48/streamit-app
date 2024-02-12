@@ -58,7 +58,6 @@ fun ProfileCreation(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(40.dp))
             Column(
                 modifier = Modifier
                     .fillMaxWidth()

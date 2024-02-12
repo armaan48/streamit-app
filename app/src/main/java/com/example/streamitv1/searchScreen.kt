@@ -67,7 +67,6 @@ fun SearchScreen(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(Modifier.height(40.dp))
             TopBar(
                 text = "Search", vM = vM
 

@@ -188,7 +188,6 @@ fun MainFollow(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(Modifier.height(40.dp))
             TopBar(
                 text = "Following", vM = vM
             )

@@ -53,7 +53,6 @@ fun MainScreen(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(Modifier.height(40.dp))
             TopBar(
                 text = "Stream it", vM = vM
             )
