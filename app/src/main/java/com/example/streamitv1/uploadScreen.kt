@@ -99,7 +99,7 @@ fun UploadScreen(
                         verticalArrangement = Arrangement.Top,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Spacer(modifier = Modifier.height(30.dp))
+                        Spacer(modifier = Modifier.height(40.dp))
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -152,11 +152,6 @@ fun UploadScreen(
                     }
                 }
             }
-            Spacer(
-                modifier = Modifier
-                    .height(40.dp)
-                    .fillMaxWidth()
-            )
         }
     }
 }

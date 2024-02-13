@@ -343,18 +343,20 @@ class ViewModel : ViewModel() {
                 video.getString("description"),
                 "https://storage.googleapis.com/video-streamit/${video.getString("id")}/output/manifest.m3u8",
 
-                if (video.getInt("is_live") == 0)
-                    "https://storage.googleapis.com/video-streamit/${video.getString("id")}/${
-                        video.getString(
-                            "id"
-                        )
-                    }.mp4"
-                else
-                    "https://storage.googleapis.com/video-streamit/streamit-server-channel-${
-                        video.getInt(
-                            "is_live"
-                        )
-                    }/manifest.m3u8",
+                if (video.getInt("is_live") == 0) "https://storage.googleapis.com/video-streamit/${
+                    video.getString(
+                        "id"
+                    )
+                }/${
+                    video.getString(
+                        "id"
+                    )
+                }.mp4"
+                else "https://storage.googleapis.com/video-streamit/streamit-server-channel-${
+                    video.getInt(
+                        "is_live"
+                    )
+                }/manifest.m3u8",
 
                 "https://storage.googleapis.com/video-streamit/${video.getString("id")}/${
                     video.getString(
@@ -388,18 +390,20 @@ class ViewModel : ViewModel() {
                 video.getString("description"),
                 "https://storage.googleapis.com/video-streamit/${video.getString("id")}/output/manifest.m3u8",
 
-                if (video.getInt("is_live") == 0)
-                    "https://storage.googleapis.com/video-streamit/${video.getString("id")}/${
-                        video.getString(
-                            "id"
-                        )
-                    }.mp4"
-                else
-                    "https://storage.googleapis.com/video-streamit/streamit-server-channel-${
-                        video.getInt(
-                            "is_live"
-                        )
-                    }/manifest.m3u8",
+                if (video.getInt("is_live") == 0) "https://storage.googleapis.com/video-streamit/${
+                    video.getString(
+                        "id"
+                    )
+                }/${
+                    video.getString(
+                        "id"
+                    )
+                }.mp4"
+                else "https://storage.googleapis.com/video-streamit/streamit-server-channel-${
+                    video.getInt(
+                        "is_live"
+                    )
+                }/manifest.m3u8",
 
                 "https://storage.googleapis.com/video-streamit/${video.getString("id")}/${
                     video.getString(
@@ -431,18 +435,20 @@ class ViewModel : ViewModel() {
                 video.getString("description"),
                 "https://storage.googleapis.com/video-streamit/${video.getString("id")}/output/manifest.m3u8",
 
-                if (video.getInt("is_live") == 0)
-                    "https://storage.googleapis.com/video-streamit/${video.getString("id")}/${
-                        video.getString(
-                            "id"
-                        )
-                    }.mp4"
-                else
-                    "https://storage.googleapis.com/video-streamit/streamit-server-channel-${
-                        video.getInt(
-                            "is_live"
-                        )
-                    }/manifest.m3u8",
+                if (video.getInt("is_live") == 0) "https://storage.googleapis.com/video-streamit/${
+                    video.getString(
+                        "id"
+                    )
+                }/${
+                    video.getString(
+                        "id"
+                    )
+                }.mp4"
+                else "https://storage.googleapis.com/video-streamit/streamit-server-channel-${
+                    video.getInt(
+                        "is_live"
+                    )
+                }/manifest.m3u8",
 
                 "https://storage.googleapis.com/video-streamit/${video.getString("id")}/${
                     video.getString(

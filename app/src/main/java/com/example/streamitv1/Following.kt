@@ -92,11 +92,6 @@ fun FollowingListView(
                     FollowerList(it)
                 }
             }
-            Spacer(
-                modifier = Modifier
-                    .height(30.dp)
-                    .fillMaxWidth()
-            )
         }
     }
 }
@@ -255,11 +250,6 @@ fun MainFollow(
                     }
                 }
             }
-            Spacer(
-                modifier = Modifier
-                    .height(30.dp)
-                    .fillMaxWidth()
-            )
         }
     }
 }

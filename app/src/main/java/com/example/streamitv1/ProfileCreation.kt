@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import org.json.JSONObject
 
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ProfileCreation(
@@ -33,6 +34,13 @@ fun ProfileCreation(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
+    /*val cropImage: ActivityResultLauncher<CropImageContractOptions> =
+        registerForActivityResult(CropImageContract()) { result ->
+            if (result.isSuccessful()) {
+                val cropped =
+                    BitmapFactory.decodeFile(result.getUriFilePath(getApplicationContext(), true))
+            }
+        }*/
 
     val pickImage =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -43,6 +51,7 @@ fun ProfileCreation(
                 )
             }
         }
+
     Column(
         modifier = Modifier
             .fillMaxSize()

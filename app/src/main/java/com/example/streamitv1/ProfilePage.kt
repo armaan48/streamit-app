@@ -189,11 +189,6 @@ fun ProfilePage(
                     )
                 }
             }
-            Spacer(
-                modifier = Modifier
-                    .height(30.dp)
-                    .fillMaxWidth()
-            )
         }
     }
 }

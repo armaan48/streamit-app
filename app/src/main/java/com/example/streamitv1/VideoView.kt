@@ -6,6 +6,7 @@ import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.annotation.OptIn
 import androidx.compose.animation.AnimatedVisibility
@@ -41,8 +42,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -64,10 +63,14 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -134,6 +137,19 @@ fun VideoView(
         activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
     }
+
+    val lifecycleObserver = remember {
+        object : LifecycleObserver {
+            @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+            fun onPause() {
+                vM.isPlaying.value = false
+                vM.exoPlayer!!.playWhenReady = false
+            }
+        }
+    }
+
+    val activity2 = (context as? ComponentActivity)
+    activity2?.lifecycle?.addObserver(lifecycleObserver)
 
     if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
         onclick(2)
@@ -220,7 +236,6 @@ fun VideoView(
                             .clickable {
                                 vM.videoFocused.value = !vM.videoFocused.value
                             }
-
                     ) {
                         DisposableEffect(key1 = Unit) {
                             onDispose {
@@ -260,15 +275,13 @@ fun VideoView(
                     }
                     Row(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(170.dp),
+                            .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Start
                     ) {
                         Spacer(modifier = Modifier.width(20.dp))
                         Column(
                             modifier = Modifier
-                                .fillMaxHeight()
                                 .weight(1F),
                             verticalArrangement = Arrangement.Top,
                             horizontalAlignment = Alignment.CenterHorizontally
@@ -276,7 +289,7 @@ fun VideoView(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .weight(1F),
+                                    .height(60.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.Start
                             ) {
@@ -331,7 +344,6 @@ fun VideoView(
                             ) {
                                 Column(
                                     modifier = Modifier
-                                        .height(73.dp)
                                         .fillMaxWidth(),
                                     verticalArrangement = Arrangement.Bottom,
                                     horizontalAlignment = Alignment.CenterHorizontally
@@ -339,18 +351,23 @@ fun VideoView(
                                     Column(
                                         modifier = Modifier
                                             .animateContentSize()
-                                            .height(60.dp)
                                             .fillMaxWidth(),
-                                        verticalArrangement = Arrangement.Center,
-                                        horizontalAlignment = Alignment.CenterHorizontally
+                                        verticalArrangement = Arrangement.Top,
+                                        horizontalAlignment = Alignment.Start
                                     ) {
-                                        Text(video.description)
+                                        Text(
+                                            text = video.description,
+                                            fontFamily = rosarioFamily,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = MaterialTheme.colorScheme.secondary
+                                        )
                                     }
+                                    Spacer(modifier =Modifier.height(10.dp))
                                 }
                             }
                             Row(
                                 modifier = Modifier
-                                    .weight(1F)
+                                    .height(60.dp)
                                     .fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.Start
@@ -409,35 +426,11 @@ fun VideoView(
                                         fontSize = 17.sp
                                     )
                                 }
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxHeight(0.6F)
-                                        .width(150.dp),
-                                    verticalArrangement = Arrangement.Center,
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    VideoViewButton(
-                                        image = R.drawable.like_icon,
-                                        text = if (vM.followingList.value.contains(video.author)) "Unsubscribe" else "Subscribe",
-                                        onclick = {
-                                            val data = JSONObject()
-                                            data.put("follower_id", vM.userName.value)
-                                            data.put("following_id", video.author.username)
-                                            if (vM.followingList.value.contains(video.author)) {
-                                                vM.mSocket.emit("unfollow", data)
-                                                vM.removeFollowing(video.author)
-                                            } else {
-                                                vM.mSocket.emit("follow", data)
-                                                vM.addFollowing(video.author)
-                                            }
-                                        }
-                                    )
-                                }
                             }
                             Row(
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .weight(1F),
+                                    .height(60.dp)
+                                    .fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.Start
                             ) {
@@ -449,8 +442,8 @@ fun VideoView(
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     VideoViewButton(
-                                        image = R.drawable.like_icon,
-                                        text = if (vM.likedVideoList.value.contains(video.id)) "Unlike" else "Like",
+                                        image = if (vM.likedVideoList.value.contains(video.id)) R.drawable.like_icon else R.drawable.filled_like_icon,
+                                        text = "likecount",
                                         onclick = {
                                             val data = JSONObject()
                                             data.put("user_id", vM.userName.value)
@@ -487,9 +480,19 @@ fun VideoView(
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     VideoViewButton(
-                                        image = R.drawable.save_icon,
-                                        text = "save",
+                                        image = -1,
+                                        text = if (vM.followingList.value.contains(video.author)) "Unsubscribe" else "Subscribe",
                                         onclick = {
+                                            val data = JSONObject()
+                                            data.put("follower_id", vM.userName.value)
+                                            data.put("following_id", video.author.username)
+                                            if (vM.followingList.value.contains(video.author)) {
+                                                vM.mSocket.emit("unfollow", data)
+                                                vM.removeFollowing(video.author)
+                                            } else {
+                                                vM.mSocket.emit("follow", data)
+                                                vM.addFollowing(video.author)
+                                            }
                                         }
                                     )
                                 }
@@ -569,7 +572,7 @@ fun SpeedSettingOptions() {
     LazyColumn(
         modifier = Modifier
             .height(200.dp)
-            .fillMaxWidth(0.95F)
+            .fillMaxWidth()
             .background(MaterialTheme.colorScheme.onPrimary)
             .clip(
                 shape = RoundedCornerShape(
@@ -581,7 +584,7 @@ fun SpeedSettingOptions() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         item {
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(20.dp))
         }
         item {
             SettingOption(
@@ -660,6 +663,9 @@ fun SpeedSettingOptions() {
                 onclick = {}
             )
         }
+        item {
+            Spacer(modifier = Modifier.height(20.dp))
+        }
     }
 }
 
@@ -668,7 +674,7 @@ fun QualitySettingOptions() {
     LazyColumn(
         modifier = Modifier
             .height(200.dp)
-            .fillMaxWidth(0.95F)
+            .fillMaxWidth()
             .background(MaterialTheme.colorScheme.onPrimary)
             .clip(
                 shape = RoundedCornerShape(
@@ -680,7 +686,7 @@ fun QualitySettingOptions() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         item {
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(20.dp))
         }
         item {
             SettingOption(
@@ -729,6 +735,9 @@ fun QualitySettingOptions() {
                 onclick = {}
             )
         }
+        item {
+            Spacer(modifier = Modifier.height(20.dp))
+        }
     }
 }
 
@@ -739,7 +748,7 @@ fun MainSettingOptions(
     LazyColumn(
         modifier = Modifier
             .height(200.dp)
-            .fillMaxWidth(0.95F)
+            .fillMaxWidth()
             .background(MaterialTheme.colorScheme.onPrimary)
             .clip(
                 shape = RoundedCornerShape(
@@ -751,7 +760,7 @@ fun MainSettingOptions(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         item {
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(20.dp))
         }
         item {
             SettingOption(
@@ -775,7 +784,7 @@ fun MainSettingOptions(
             )
         }
         item {
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(20.dp))
         }
     }
 }
@@ -796,7 +805,7 @@ fun SettingOption(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start
     ) {
-        Spacer(modifier = Modifier.width(5.dp))
+        Spacer(modifier = Modifier.width(15.dp))
         Row(
             modifier = Modifier
                 .fillMaxHeight()
@@ -818,8 +827,9 @@ fun SettingOption(
         Text(
             text = text,
             fontFamily = rosarioFamily,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.secondary
+            fontWeight = FontWeight.Normal,
+            color = MaterialTheme.colorScheme.secondary,
+            fontSize = 15.sp
         )
     }
 }
@@ -830,42 +840,29 @@ fun VideoViewButton(
     text: String,
     onclick: () -> Unit
 ) {
-    Button(
-        modifier = Modifier
-            .fillMaxHeight(0.95F)
-            .fillMaxWidth(0.9F),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.secondary,
-            contentColor = MaterialTheme.colorScheme.primary,
-            disabledContainerColor = MaterialTheme.colorScheme.secondary,
-            disabledContentColor = MaterialTheme.colorScheme.primary
-        ),
-        onClick = { onclick() },
-        shape = RoundedCornerShape(4.dp)
-    ) {
         Row(
             modifier = Modifier
-                .fillMaxSize(),
+                .fillMaxHeight(0.95F)
+                .fillMaxWidth(0.9F)
+                .clickable { onclick() }
+                .background(MaterialTheme.colorScheme.secondary)
+                .clip(shape = RoundedCornerShape(4.dp)),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.Center
         ) {
             if (image != -1) {
                 Icon(
                     modifier = Modifier
-                        .height(40.dp)
+                        .height(20.dp)
                         .aspectRatio(1F),
                     painter = painterResource(image),
                     contentDescription = "",
                     tint = MaterialTheme.colorScheme.primary
                 )
+                Spacer(modifier = Modifier.width(5.dp))
             }
             Text(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .weight(1F)
-                    .padding(
-                        start = 15.dp
-                    ),
+                textAlign = TextAlign.Center,
                 text = text,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Normal,
@@ -873,7 +870,7 @@ fun VideoViewButton(
                 color = MaterialTheme.colorScheme.primary
             )
         }
-    }
+
 }
 
 @SuppressLint("SourceLockedOrientationActivity")

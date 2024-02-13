@@ -3,6 +3,14 @@ package com.example.streamitv1
 import android.graphics.BlurMaskFilter
 import android.util.Log
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -35,6 +43,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,6 +63,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.streamitv1.ui.theme.HeavyLoadColor
+import com.example.streamitv1.ui.theme.LightLoadColor
+import com.example.streamitv1.ui.theme.OffGrey2
 import com.example.streamitv1.ui.theme.rosarioFamily
 
 @Composable
@@ -103,11 +115,15 @@ fun VideoPreview(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    AsyncImage(
-                        model = video.videoThumbnail,
-                        modifier = Modifier.fillMaxSize(),
-                        contentDescription = video.title
-                    )
+                    if (video.videoThumbnail != null) {
+                        AsyncImage(
+                            model = video.videoThumbnail,
+                            modifier = Modifier.fillMaxSize(),
+                            contentDescription = video.title
+                        )
+                    } else {
+                        GradientBox(modifier = Modifier.fillMaxSize())
+                    }
                 }
             }
         }
@@ -196,35 +212,6 @@ fun VideoPreview(
                     )
                 }
             }
-            Column(
-                modifier = Modifier
-                    .height(50.dp)
-                    .width(50.dp)
-                    .clip(
-                        shape = RoundedCornerShape(50.dp)
-                    )
-                    .clickable {},
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.End
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .aspectRatio(1F),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Icon(
-                        modifier = Modifier
-                            .height(30.dp)
-                            .aspectRatio(1F),
-                        painter = painterResource(R.drawable.three_dots_hollow),
-                        contentDescription = "back_arrow_icon_light",
-                        tint = MaterialTheme.colorScheme.secondary
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.width(15.dp))
         }
         Divider(
             modifier = Modifier.fillMaxWidth(0.90F),
@@ -560,7 +547,7 @@ fun SideOptions(
                     navController.navigate("Login")
                 }
             })
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(10.dp))
         }
     }
 }
@@ -613,6 +600,23 @@ fun SideBarOption(
     }
 }
 
-
-
-
+@Composable
+fun GradientBox(
+    modifier :Modifier
+){
+    val infiniteTransition = rememberInfiniteTransition(label = "infinite")
+    val color by infiniteTransition.animateColor(
+        initialValue = LightLoadColor,
+        targetValue = HeavyLoadColor,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = FastOutLinearInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "color"
+    )
+    Box(
+        modifier = modifier.drawBehind {
+            drawRect(color)
+        }
+    )
+}

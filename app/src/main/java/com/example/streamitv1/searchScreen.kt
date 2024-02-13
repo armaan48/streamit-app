@@ -69,14 +69,12 @@ fun SearchScreen(
         ) {
             TopBar(
                 text = "Search", vM = vM
-
             )
             Divider(
                 modifier = Modifier.fillMaxWidth(0.95F),
                 thickness = 1.dp,
                 color = MaterialTheme.colorScheme.tertiary
             )
-            Spacer(Modifier.height(12.dp))
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -84,7 +82,7 @@ fun SearchScreen(
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(15.dp))
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -95,18 +93,14 @@ fun SearchScreen(
                     SearchInputField(type = vM.searchInput, text = "Search", ondone = {
                         vM.mSocket.emit("give-search-video-list", vM.searchInput.value)
                     })
-
-
                 }
-                Spacer(modifier = Modifier.height(5.dp))
-
+                Spacer(modifier = Modifier.height(15.dp))
                 Divider(
                     modifier = Modifier.fillMaxWidth(0.95F),
                     thickness = 1.dp,
                     color = MaterialTheme.colorScheme.tertiary
                 )
                 Spacer(modifier = Modifier.height(5.dp))
-
                 LazyVerticalGrid(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Top,
@@ -122,11 +116,6 @@ fun SearchScreen(
                     }
                 }
             }
-            Spacer(
-                modifier = Modifier
-                    .height(30.dp)
-                    .fillMaxWidth()
-            )
         }
     }
 }

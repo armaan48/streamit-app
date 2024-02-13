@@ -14,9 +14,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navigation
 import com.example.streamitv1.ui.theme.StreamitTheme
 import kotlinx.coroutines.delay
 import org.json.JSONObject

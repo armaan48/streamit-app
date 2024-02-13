@@ -19,6 +19,7 @@ val DarkColorScheme = darkColorScheme(
     tertiary = OffGrey,
     onTertiary =OffGrey2,
     onError = ErrorColorB,
+    onErrorContainer = ErrorColorW ,
     onPrimary = DarkBlack
 )
 
