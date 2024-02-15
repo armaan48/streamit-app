@@ -29,7 +29,7 @@ import org.json.JSONObject
 @Composable
 fun ProfileCreation(
     navController: NavController,
-    vM: ViewModel,
+    vM: MyViewModel,
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current

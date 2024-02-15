@@ -27,7 +27,7 @@ import androidx.navigation.NavController
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SignupPage(
-    navController: NavController, mainActivity: MainActivity, vM: ViewModel
+    navController: NavController, vM: MyViewModel, onSuccess: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -158,7 +158,7 @@ fun SignupPage(
                     }else {
                         vM.errorType.value = ""
                         signup(
-                            vM.userName.value, vM.password.value, navController, mainActivity, vM
+                            vM.userName.value, vM.password.value, navController, vM , onSuccess
                         )
                     }
                 }

@@ -42,7 +42,7 @@ import androidx.navigation.NavController
 
 @Composable
 fun SearchScreen(
-    navController: NavController, mainActivity: MainActivity, vM: ViewModel
+    navController: NavController, vM: MyViewModel
 ) {
     val w = LocalConfiguration.current.screenWidthDp.dp
 
@@ -52,7 +52,7 @@ fun SearchScreen(
         label = ""
     )
 
-    SideOptions(navController, mainActivity, vM)
+    SideOptions(navController, vM)
     Column(
         modifier = Modifier
             .fillMaxSize()

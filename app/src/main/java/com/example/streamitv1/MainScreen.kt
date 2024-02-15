@@ -6,10 +6,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -27,7 +25,7 @@ import androidx.navigation.NavController
 
 @Composable
 fun MainScreen(
-    navController: NavController, mainActivity: MainActivity, vM: ViewModel
+    navController: NavController, vM: MyViewModel
 ) {
 
     val w = LocalConfiguration.current.screenWidthDp.dp
@@ -38,7 +36,7 @@ fun MainScreen(
         label = ""
     )
 
-    SideOptions(navController, mainActivity, vM)
+    SideOptions(navController, vM)
     Column(
         modifier = Modifier
             .fillMaxSize()

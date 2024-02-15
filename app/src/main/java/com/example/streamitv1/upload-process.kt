@@ -21,7 +21,7 @@ import kotlin.math.min
 
 @RequiresApi(Build.VERSION_CODES.O)
 fun startChunking(
-    vM: ViewModel,
+    vM: MyViewModel,
     uri: Uri,
     size: MutableLongState,
     chunkSize: Long,
@@ -65,7 +65,7 @@ fun startChunking(
 
 
 fun uploadChunk(
-    vM: ViewModel,
+    vM: MyViewModel,
     size: MutableLongState,
     chunkSize: Long,
     chunkSent: MutableLongState,

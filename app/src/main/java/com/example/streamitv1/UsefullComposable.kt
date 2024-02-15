@@ -5,8 +5,6 @@ import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.FastOutLinearInEasing
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
@@ -53,6 +51,7 @@ import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -65,12 +64,11 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.streamitv1.ui.theme.HeavyLoadColor
 import com.example.streamitv1.ui.theme.LightLoadColor
-import com.example.streamitv1.ui.theme.OffGrey2
 import com.example.streamitv1.ui.theme.rosarioFamily
 
 @Composable
 fun VideoPreview(
-    navController: NavController, vM: ViewModel, video: VideoDetail
+    navController: NavController, vM: MyViewModel, video: VideoDetail
 ) {
     Column(
         modifier = Modifier
@@ -109,6 +107,12 @@ fun VideoPreview(
                         .background(MaterialTheme.colorScheme.primary)
                         .clickable {
                             vM.exoPlayer?.release()
+                            Log.d("armaan op" ,"VideoPlayer/${video.str}" )
+                            vM.currentPosition.longValue = 0
+                            vM.currentVideoURL.value = video.videoURL2
+                            vM.qualityChoice.intValue = 0
+                            vM.speedChoice.intValue = 3
+
                             vM.mSocket.emit("increment-views", video.id)
                             navController.navigate("VideoPlayer/${video.str}")
                         },
@@ -119,7 +123,7 @@ fun VideoPreview(
                         AsyncImage(
                             model = video.videoThumbnail,
                             modifier = Modifier.fillMaxSize(),
-                            contentDescription = video.title
+                            contentDescription = video.title,
                         )
                     } else {
                         GradientBox(modifier = Modifier.fillMaxSize())
@@ -140,7 +144,8 @@ fun VideoPreview(
                     .height(55.dp)
                     .width(55.dp)
                     .clickable {
-                        navController.navigate("ProfilePage")
+                        vM.filterVideo(video.author.username)
+                        navController.navigate("ProfilePage/${video.author.username}")
                     },
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -160,7 +165,8 @@ fun VideoPreview(
                             spread = 1.dp,
                         )
                         .clickable {
-                            navController.navigate("ProfilePage")
+                            vM.filterVideo(video.author.username)
+                            navController.navigate("ProfilePage/${video.author.username}")
                         })
                     AsyncImage(
                         model = video.author.dpURL,
@@ -190,7 +196,7 @@ fun VideoPreview(
                     horizontalAlignment = Alignment.Start
                 ) {
                     Text(
-                        text = video.author.username,
+                        text = video.title,
                         fontFamily = rosarioFamily,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.secondary
@@ -204,7 +210,7 @@ fun VideoPreview(
                     horizontalAlignment = Alignment.Start
                 ) {
                     Text(
-                        text = video.title,
+                        text = video.author.username,
                         fontFamily = rosarioFamily,
                         fontWeight = FontWeight.Light,
                         fontSize = 14.sp,
@@ -223,7 +229,7 @@ fun VideoPreview(
 
 @Composable
 fun TopBar(
-    text: String, vM: ViewModel
+    text: String, vM: MyViewModel
 ) {
     Row(
         modifier = Modifier
@@ -416,10 +422,9 @@ fun LoginNSignupButton(
 
 @Composable
 fun SideOptions(
-    navController: NavController, mainActivity: MainActivity, vM: ViewModel
+    navController: NavController, vM: MyViewModel
 ) {
     val w = LocalConfiguration.current.screenWidthDp.dp
-    val context = mainActivity.applicationContext
 
     Column(
         modifier = Modifier
@@ -451,7 +456,12 @@ fun SideOptions(
                         .clip(
                             shape = RoundedCornerShape(30.dp)
                         )
-                        .background(MaterialTheme.colorScheme.primary),
+                        .background(MaterialTheme.colorScheme.primary).clickable{
+
+                        }.clickable{
+                            vM.filterVideo(vM.userName.value)
+                            navController.navigate("ProfilePage/${vM.userName.value}")
+                        },
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -542,7 +552,6 @@ fun SideOptions(
             SideBarOption(image = R.drawable.logout_icon, text = "Log out", onclick = {
                 vM.reset()
                 if (!vM.isOffsetEnabled.value) {
-                    vM.saveUserCredentials(context, "", "")
                     vM.isOffsetEnabled.value = !vM.isOffsetEnabled.value
                     navController.navigate("Login")
                 }

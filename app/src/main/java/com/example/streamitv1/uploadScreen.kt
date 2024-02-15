@@ -57,7 +57,7 @@ import org.json.JSONObject
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun UploadScreen(
-    navController: NavController, mainActivity: MainActivity, vM: ViewModel
+    navController: NavController, vM: MyViewModel
 ) {
     val w = LocalConfiguration.current.screenWidthDp.dp
 
@@ -67,7 +67,7 @@ fun UploadScreen(
         label = ""
     )
 
-    SideOptions(navController, mainActivity, vM)
+    SideOptions(navController, vM)
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -159,7 +159,7 @@ fun UploadScreen(
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Live(
-    vM: ViewModel
+    vM: MyViewModel
 ) {
 
     val clipboardManager = LocalClipboardManager.current
@@ -384,7 +384,7 @@ fun Live(
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Upload(
-    vM: ViewModel
+    vM: MyViewModel
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current

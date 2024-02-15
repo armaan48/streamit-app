@@ -6,11 +6,16 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.OptIn
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.media3.common.util.Log
+import androidx.media3.common.util.UnstableApi
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -23,12 +28,23 @@ import org.json.JSONObject
 
 @RequiresApi(Build.VERSION_CODES.O)
 class MainActivity : ComponentActivity() {
+
+
+
+
+    @OptIn(UnstableApi::class)
     @RequiresApi(Build.VERSION_CODES.R)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         SocketHandler.setSocket()
         val mSocket = SocketHandler.getSocket()
         mSocket.connect()
+
+
+
+
+
         fun enterFullscreen() {
             println("type:::enter")
             window.decorView.apply {
@@ -37,33 +53,48 @@ class MainActivity : ComponentActivity() {
                         View.SYSTEM_UI_FLAG_IMMERSIVE
             }
         }
-        val context = this@MainActivity.applicationContext
+
 
         fun exitFullscreen() {
             println("type:::exit")
             window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
         }
+
+
         setContent {
+
+            Log.d("armaan is very sad", "wow\n");
+
+
+            val vM :MyViewModel = viewModel()
+
             val navController = rememberNavController()
-            val vM: ViewModel = viewModel()
 
-            val username by UserPreferences.getUserName(context).collectAsState(initial = "")
-            val password by UserPreferences.getPassword(context).collectAsState(initial = "")
 
-            LaunchedEffect(username) {
-                delay(1000)
-                if (username.toString()!="" && password.toString()!="" && username.toString()!="null" && password.toString()!="null") {
-                    vM.userName.value = username.toString()
-                    vM.password.value = password.toString()
-                    login(vM.userName.value, vM.password.value, navController, this@MainActivity, vM)
-                } else {
-                    navController.navigate("Login")
-                }
-            }
+
+//            LaunchedEffect(vM.userName.value) {
+//
+//                delay(1000)
+//                if (vM.userName.value != "" && vM.password.value != "" ) {
+//                    login(
+//                        vM.userName.value,
+//                        vM.password.value,
+//                        navController as NavController,
+//                        vM,
+//                        this@MainActivity,
+//
+//                    ) {
+//                        navController.navigate("Main")
+//                    }
+//                } else {
+//                    (navController as NavController).navigate("Login")
+//                }
+//            }
             StreamitTheme {
                 NavHost(
-                    navController = navController,
-                    startDestination = "Load"
+                    navController = (navController as NavHostController),
+                    startDestination = "Login",
+                    route = "LoginSection"
                 ) {
                     composable(
                         route = "Load"
@@ -74,14 +105,17 @@ class MainActivity : ComponentActivity() {
                         route = "Login"
                     ) {
                         LoginPage(
-                            navController = navController,
-                            mainActivity = this@MainActivity,
-                            vM = vM
-                        )
+                            navController = (navController as NavController),
+                            vM = vM,
+                            this@MainActivity
+                        ) {
+                            print("armaan is very sad at navigator")
+                            navController.navigate("Main")
+                        }
                     }
                     composable("ProfileCreation") {
                         ProfileCreation(
-                            navController = navController,
+                            navController = (navController as NavController),
                             vM = vM
                         )
                     }
@@ -89,16 +123,17 @@ class MainActivity : ComponentActivity() {
                         route = "Signup"
                     ) {
                         SignupPage(
-                            navController = navController,
-                            mainActivity = this@MainActivity,
+                            navController = (navController as NavController),
                             vM = vM
-                        )
+                        ) {
+
+                            navController.navigate("ProfileCreation")
+                        }
                     }
                     navigation(startDestination = "HomePage", route = "Main") {
                         composable("HomePage") {
                             MainScreen(
-                                navController = navController,
-                                mainActivity = this@MainActivity,
+                                navController = (navController as NavController),
                                 vM = vM
                             )
                         }
@@ -115,9 +150,8 @@ class MainActivity : ComponentActivity() {
                                 val video = JSONObject(videoJson)
                                 VideoView(
 
-                                    navController = navController,
+                                    navController = (navController as NavController),
                                     vM = vM,
-                                    mainActivity = this@MainActivity,
                                     video = VideoDetail(
                                         video.toString(),
                                         video.getString("id"),
@@ -136,17 +170,13 @@ class MainActivity : ComponentActivity() {
                                             video.getString(
                                                 "id"
                                             )
-                                        }/output/manifest.m3u8",
+                                        }/output/",
                                         if (video.getInt("is_live") == 0)
                                             "https://storage.googleapis.com/video-streamit/${
                                                 video.getString(
                                                     "id"
                                                 )
-                                            }/${
-                                                video.getString(
-                                                    "id"
-                                                )
-                                            }.mp4"
+                                            }/output/manifest.m3u8"
                                         else
                                             "https://storage.googleapis.com/video-streamit/streamit-server-channel-${
                                                 video.getInt(
@@ -176,46 +206,62 @@ class MainActivity : ComponentActivity() {
                             }
 
                         }
+                        composable(
+                            "ProfilePage/{user}",
+                            arguments = listOf(
+                                navArgument(name = "user") {
+                                    type = NavType.StringType
+                                }
+                            )
+                        ) {
+                            val userArgument = it.arguments?.getString("user")
+                            if (userArgument != null) {
+                                ProfilePage(
+                                    (navController as NavController),
+                                    vM,
+                                    UserDetail(
+                                        userArgument,
+                                        dpURL = "https://storage.googleapis.com/user-streamit/${userArgument}.png"
+
+                                    )
+                                )
+                            }
+                        }
+
+
                         composable("Upload") {
                             UploadScreen(
-                                navController = navController,
-                                mainActivity = this@MainActivity,
+                                navController = (navController as NavController),
                                 vM = vM
                             )
                         }
                         navigation(startDestination = "FollowingMain", route = "Following") {
                             composable("FollowingMain") {
                                 MainFollow(
-                                    navController = navController,
-                                    mainActivity = this@MainActivity,
+                                    navController = (navController as NavController),
                                     vM = vM
                                 )
                             }
                             composable("FollowerList") {
                                 FollowingListView(
-                                    navController = navController,
-                                    mainActivity = this@MainActivity,
+                                    navController = (navController as NavController),
                                     vM = vM
                                 )
                             }
                         }
                         composable("Search") {
                             SearchScreen(
-                                navController = navController,
-                                mainActivity = this@MainActivity,
+                                navController = (navController as NavController),
                                 vM = vM
                             )
                         }
-                        composable("ProfilePage") {
-                            ProfilePage(
-                                navController = navController,
-                                mainActivity = this@MainActivity,
-                                vM = vM
-                            )
-                        }
+
                     }
+
                 }
             }
         }
     }
+
+
 }

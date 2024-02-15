@@ -10,21 +10,22 @@ import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.exoplayer.ExoPlayer
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
 
-class ViewModel : ViewModel() {
+class MyViewModel : ViewModel() {
 
-    fun saveUserCredentials(context: Context, userName: String, password: String) {
-        viewModelScope.launch {
-            UserPreferences.saveCredentials(context, userName, password)
-        }
-    }
 
     private val _userName = mutableStateOf("")
     private val _password = mutableStateOf("")
@@ -38,6 +39,10 @@ class ViewModel : ViewModel() {
     private val _liveStatus = mutableStateOf(0)
     private val _liveServer = mutableStateOf("")
     private val _livePassword = mutableStateOf("")
+    private val _subscriberCount = mutableStateMapOf<String , Long>()
+    private val _qualityChoice = mutableIntStateOf(0)
+    private val _speedChoice = mutableIntStateOf(0)
+    private val _currentVideoURL = mutableStateOf("")
 
     private val _currentPosition = mutableLongStateOf(0)
 
@@ -89,6 +94,11 @@ class ViewModel : ViewModel() {
     val videoPercentageUploaded: MutableDoubleState = _videoPercentageUploaded
     val videoChunkList = mutableStateListOf<String>()
 
+    val subscriberCount : MutableMap<String , Long> = _subscriberCount
+
+    val qualityChoice : MutableIntState = _qualityChoice
+    val speedChoice : MutableIntState = _speedChoice
+    val currentVideoURL: MutableState<String> = _currentVideoURL
 
     val videoThumbnailSize: MutableLongState = _videoThumbnailSize
     val videoThumbnailTotalChunks: MutableLongState = _videoThumbnailTotalChunks
@@ -119,6 +129,13 @@ class ViewModel : ViewModel() {
     val videoList = mutableStateListOf<VideoDetail>()
     val followingVideoList = mutableStateListOf<VideoDetail>()
     val searchVideoList = mutableStateListOf<VideoDetail>()
+    val profileVideoList = mutableStateListOf<VideoDetail>()
+
+
+
+
+
+
 
     private val _searchInput = mutableStateOf("")
 
@@ -278,6 +295,16 @@ class ViewModel : ViewModel() {
         _likedVideoList.value = _likedVideoList.value.minus(video_id)
     }
 
+
+    fun filterVideo(user: String){
+        profileVideoList.clear()
+        videoList.forEach{
+            if (it.author.username == user){
+                profileVideoList.add(it)
+            }
+        }
+    }
+
     private val liveThumbnailChunkHandler: (Array<Any>) -> Unit = {
         Log.d("upload", "trying to live-thumbnail")
         if (liveThumbnailTotalChunks.longValue.toInt() != 0) {
@@ -329,6 +356,7 @@ class ViewModel : ViewModel() {
         println("I GOT THE VIDEOS ${it[0].toString()}")
         videoList.clear()
         val newVideoList = it[0] as JSONArray
+
         for (i in 0 until newVideoList.length()) {
             val video = newVideoList.getJSONObject(i)
             val videoFormatted = VideoDetail(
@@ -341,17 +369,13 @@ class ViewModel : ViewModel() {
                 video.getString("title"),
                 video.getString("tags"),
                 video.getString("description"),
-                "https://storage.googleapis.com/video-streamit/${video.getString("id")}/output/manifest.m3u8",
+                "https://storage.googleapis.com/video-streamit/${video.getString("id")}/output/",
 
                 if (video.getInt("is_live") == 0) "https://storage.googleapis.com/video-streamit/${
                     video.getString(
                         "id"
                     )
-                }/${
-                    video.getString(
-                        "id"
-                    )
-                }.mp4"
+                }/output/manifest.m3u8"
                 else "https://storage.googleapis.com/video-streamit/streamit-server-channel-${
                     video.getInt(
                         "is_live"
@@ -388,17 +412,13 @@ class ViewModel : ViewModel() {
                 video.getString("title"),
                 video.getString("tags"),
                 video.getString("description"),
-                "https://storage.googleapis.com/video-streamit/${video.getString("id")}/output/manifest.m3u8",
+                "https://storage.googleapis.com/video-streamit/${video.getString("id")}/output/",
 
                 if (video.getInt("is_live") == 0) "https://storage.googleapis.com/video-streamit/${
                     video.getString(
                         "id"
                     )
-                }/${
-                    video.getString(
-                        "id"
-                    )
-                }.mp4"
+                }/output/manifest.m3u8"
                 else "https://storage.googleapis.com/video-streamit/streamit-server-channel-${
                     video.getInt(
                         "is_live"
@@ -433,17 +453,13 @@ class ViewModel : ViewModel() {
                 video.getString("title"),
                 video.getString("tags"),
                 video.getString("description"),
-                "https://storage.googleapis.com/video-streamit/${video.getString("id")}/output/manifest.m3u8",
+                "https://storage.googleapis.com/video-streamit/${video.getString("id")}/output/",
 
                 if (video.getInt("is_live") == 0) "https://storage.googleapis.com/video-streamit/${
                     video.getString(
                         "id"
                     )
-                }/${
-                    video.getString(
-                        "id"
-                    )
-                }.mp4"
+                }/output/manifest.m3u8"
                 else "https://storage.googleapis.com/video-streamit/streamit-server-channel-${
                     video.getInt(
                         "is_live"
@@ -493,13 +509,24 @@ class ViewModel : ViewModel() {
     private val startLive: (Array<Any>) -> Unit = {
         liveStatus.value = 2
     }
+    private val userDataHandler: (Array<Any>) -> Unit = {
+        val data = it[0] as JSONObject
+        subscriberCount[data.getString("username")] = data.getLong("follower_count")
+    }
+
 
     fun reset() {
         userName.value = ""
         password.value = ""
         confirmPassword.value = ""
         errorType.value = ""
+        errorType.value = ""
     }
+
+
+
+
+
 
     init {
         mSocket = SocketHandler.getSocket()
@@ -519,6 +546,10 @@ class ViewModel : ViewModel() {
 
         mSocket.on("send-server-details", serverDetailHandler)
         mSocket.on("start-live", startLive)
+
+
+
+        mSocket.on("send-user-data" , userDataHandler)
     }
 
 }

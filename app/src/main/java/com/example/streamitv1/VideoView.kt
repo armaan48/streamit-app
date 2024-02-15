@@ -88,8 +88,7 @@ import org.json.JSONObject
 @Composable
 fun VideoView(
     navController: NavController,
-    mainActivity: MainActivity,
-    vM: ViewModel,
+    vM: MyViewModel,
     video: VideoDetail,
     onclick: (type: Int) -> Unit
 ) {
@@ -151,6 +150,7 @@ fun VideoView(
     val activity2 = (context as? ComponentActivity)
     activity2?.lifecycle?.addObserver(lifecycleObserver)
 
+
     if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
         onclick(2)
     } else {
@@ -169,6 +169,7 @@ fun VideoView(
             ) {
                 DisposableEffect(key1 = Unit) {
                     onDispose {
+                        println("release test")
                         vM.exoPlayer?.release()
                     }
                 }
@@ -208,7 +209,6 @@ fun VideoView(
         else -> {
             SideOptions(
                 navController = navController,
-                mainActivity = mainActivity,
                 vM = vM
             )
             Column(
@@ -239,6 +239,7 @@ fun VideoView(
                     ) {
                         DisposableEffect(key1 = Unit) {
                             onDispose {
+                                println("release test")
                                 vM.exoPlayer?.release()
                             }
                         }
@@ -273,240 +274,6 @@ fun VideoView(
                             }
                         }
                     }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start
-                    ) {
-                        Spacer(modifier = Modifier.width(20.dp))
-                        Column(
-                            modifier = Modifier
-                                .weight(1F),
-                            verticalArrangement = Arrangement.Top,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(60.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Start
-                            ) {
-                                Text(
-                                    modifier = Modifier
-                                        .weight(1F),
-                                    text = video.title,
-                                    fontFamily = rosarioFamily,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.secondary,
-                                    fontSize = 18.sp
-                                )
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxHeight()
-                                        .weight(1F),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.End
-                                ) {
-                                    Text(
-                                        text = "${video.views} Views ",
-                                        fontFamily = rosarioFamily,
-                                        fontWeight = FontWeight.Light,
-                                        color = MaterialTheme.colorScheme.secondary,
-                                        fontSize = 16.sp
-                                    )
-                                    Spacer(modifier = Modifier.width(10.dp))
-                                    Text(
-                                        modifier = Modifier
-                                            .clickable {
-                                                vM.descriptionExtended.value =
-                                                    !vM.descriptionExtended.value
-                                            },
-                                        text = "...more",
-                                        fontFamily = rosarioFamily,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = MaterialTheme.colorScheme.secondary,
-                                        fontSize = 17.sp
-                                    )
-                                }
-                            }
-                            AnimatedVisibility(
-                                vM.descriptionExtended.value,
-                                enter = expandVertically(
-                                    animationSpec = tween(durationMillis = 200),
-                                    expandFrom = Alignment.Top
-                                ) { 60 } + fadeIn(),
-                                exit = shrinkVertically(
-                                    animationSpec = tween(durationMillis = 200),
-                                    shrinkTowards = Alignment.Bottom
-                                ) { 0 } + fadeOut()
-                            ) {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth(),
-                                    verticalArrangement = Arrangement.Bottom,
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Column(
-                                        modifier = Modifier
-                                            .animateContentSize()
-                                            .fillMaxWidth(),
-                                        verticalArrangement = Arrangement.Top,
-                                        horizontalAlignment = Alignment.Start
-                                    ) {
-                                        Text(
-                                            text = video.description,
-                                            fontFamily = rosarioFamily,
-                                            fontWeight = FontWeight.SemiBold,
-                                            color = MaterialTheme.colorScheme.secondary
-                                        )
-                                    }
-                                    Spacer(modifier =Modifier.height(10.dp))
-                                }
-                            }
-                            Row(
-                                modifier = Modifier
-                                    .height(60.dp)
-                                    .fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Start
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxHeight()
-                                        .weight(1F),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.Start
-                                ) {
-                                    Column(
-                                        modifier = Modifier
-                                            .fillMaxHeight()
-                                            .aspectRatio(1F)
-                                            .clickable {
-                                                navController.navigate("ProfilePage")
-                                            },
-                                        verticalArrangement = Arrangement.Center,
-                                        horizontalAlignment = Alignment.CenterHorizontally
-                                    ) {
-                                        Box(
-                                            modifier = Modifier.fillMaxSize(),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Box(
-                                                modifier = Modifier
-                                                    .height(40.dp)
-                                                    .width(40.dp)
-                                                    .shadow(
-                                                        color = MaterialTheme.colorScheme.onTertiary,
-                                                        borderRadius = 32.dp,
-                                                        blurRadius = 3.dp,
-                                                        offsetY = 5.dp,
-                                                        offsetX = 0.dp,
-                                                        spread = 1.dp,
-                                                    )
-                                            )
-                                            AsyncImage(
-                                                model = video.author.dpURL,
-                                                modifier = Modifier
-                                                    .size(39.dp)
-                                                    .clip(CircleShape),
-                                                placeholder = painterResource(id = R.drawable.user_icon),
-                                                error = painterResource(id = R.drawable.user_icon),
-                                                contentDescription = "User Dp",
-                                            )
-                                        }
-                                    }
-                                    Spacer(modifier = Modifier.width(10.dp))
-                                    Text(
-                                        text = video.author.username,
-                                        fontFamily = rosarioFamily,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.secondary,
-                                        fontSize = 17.sp
-                                    )
-                                }
-                            }
-                            Row(
-                                modifier = Modifier
-                                    .height(60.dp)
-                                    .fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Start
-                            ) {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxHeight(0.6F)
-                                        .weight(1F),
-                                    verticalArrangement = Arrangement.Center,
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    VideoViewButton(
-                                        image = if (vM.likedVideoList.value.contains(video.id)) R.drawable.like_icon else R.drawable.filled_like_icon,
-                                        text = "likecount",
-                                        onclick = {
-                                            val data = JSONObject()
-                                            data.put("user_id", vM.userName.value)
-                                            data.put("video_id", video.id)
-                                            if (vM.likedVideoList.value.contains(video.id)) {
-                                                vM.mSocket.emit("unlike", data)
-                                                vM.unlikeVideo(video.id)
-                                            } else {
-                                                vM.mSocket.emit("like", data)
-                                                vM.likeVideo(video.id)
-                                            }
-                                        }
-                                    )
-                                }
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxHeight(0.6F)
-                                        .weight(1F),
-                                    verticalArrangement = Arrangement.Center,
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    VideoViewButton(
-                                        image = R.drawable.share_icon,
-                                        text = "share",
-                                        onclick = {
-                                        }
-                                    )
-                                }
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxHeight(0.6F)
-                                        .weight(1F),
-                                    verticalArrangement = Arrangement.Center,
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    VideoViewButton(
-                                        image = -1,
-                                        text = if (vM.followingList.value.contains(video.author)) "Unsubscribe" else "Subscribe",
-                                        onclick = {
-                                            val data = JSONObject()
-                                            data.put("follower_id", vM.userName.value)
-                                            data.put("following_id", video.author.username)
-                                            if (vM.followingList.value.contains(video.author)) {
-                                                vM.mSocket.emit("unfollow", data)
-                                                vM.removeFollowing(video.author)
-                                            } else {
-                                                vM.mSocket.emit("follow", data)
-                                                vM.addFollowing(video.author)
-                                            }
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                        Spacer(modifier = Modifier.width(20.dp))
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Divider(
-                        modifier = Modifier.fillMaxWidth(0.95F),
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.tertiary
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
                     LazyVerticalGrid(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -515,6 +282,245 @@ fun VideoView(
                         horizontalArrangement = Arrangement.Center,
                         columns = GridCells.Adaptive(minSize = 370.dp)
                     ) {
+                        item{
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Start
+                            ) {
+                                Spacer(modifier = Modifier.width(20.dp))
+                                Column(
+                                    modifier = Modifier
+                                        .weight(1F),
+                                    verticalArrangement = Arrangement.Top,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(60.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Start
+                                    ) {
+                                        Text(
+                                            modifier = Modifier
+                                                .weight(1F),
+                                            text = video.title,
+                                            fontFamily = rosarioFamily,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.secondary,
+                                            fontSize = 18.sp
+                                        )
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxHeight()
+                                                .weight(1F),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.End
+                                        ) {
+                                            Text(
+                                                text = "${video.views} Views ",
+                                                fontFamily = rosarioFamily,
+                                                fontWeight = FontWeight.Light,
+                                                color = MaterialTheme.colorScheme.secondary,
+                                                fontSize = 16.sp
+                                            )
+                                            Spacer(modifier = Modifier.width(10.dp))
+                                            Text(
+                                                modifier = Modifier
+                                                    .clickable {
+                                                        vM.descriptionExtended.value =
+                                                            !vM.descriptionExtended.value
+                                                    },
+                                                text = "...more",
+                                                fontFamily = rosarioFamily,
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = MaterialTheme.colorScheme.secondary,
+                                                fontSize = 17.sp
+                                            )
+                                        }
+                                    }
+                                    AnimatedVisibility(
+                                        vM.descriptionExtended.value,
+                                        enter = expandVertically(
+                                            animationSpec = tween(durationMillis = 200),
+                                            expandFrom = Alignment.Top
+                                        ) { 60 } + fadeIn(),
+                                        exit = shrinkVertically(
+                                            animationSpec = tween(durationMillis = 200),
+                                            shrinkTowards = Alignment.Bottom
+                                        ) { 0 } + fadeOut()
+                                    ) {
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth(),
+                                            verticalArrangement = Arrangement.Bottom,
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            Column(
+                                                modifier = Modifier
+                                                    .animateContentSize()
+                                                    .fillMaxWidth(),
+                                                verticalArrangement = Arrangement.Top,
+                                                horizontalAlignment = Alignment.Start
+                                            ) {
+                                                Text(
+                                                    text = video.description,
+                                                    fontFamily = rosarioFamily,
+                                                    fontWeight = FontWeight.SemiBold,
+                                                    color = MaterialTheme.colorScheme.secondary
+                                                )
+                                            }
+                                            Spacer(modifier =Modifier.height(10.dp))
+                                        }
+                                    }
+                                    Row(
+                                        modifier = Modifier
+                                            .height(60.dp)
+                                            .fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Start
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxHeight()
+                                                .weight(1F),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.Start
+                                        ) {
+                                            Column(
+                                                modifier = Modifier
+                                                    .fillMaxHeight()
+                                                    .aspectRatio(1F)
+                                                    .clickable {
+                                                        vM.filterVideo(video.author.username)
+                                                        navController.navigate("ProfilePage/${video.author.username}")
+                                                    },
+                                                verticalArrangement = Arrangement.Center,
+                                                horizontalAlignment = Alignment.CenterHorizontally
+                                            ) {
+                                                Box(
+                                                    modifier = Modifier.fillMaxSize(),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .height(40.dp)
+                                                            .width(40.dp)
+                                                            .shadow(
+                                                                color = MaterialTheme.colorScheme.onTertiary,
+                                                                borderRadius = 32.dp,
+                                                                blurRadius = 3.dp,
+                                                                offsetY = 5.dp,
+                                                                offsetX = 0.dp,
+                                                                spread = 1.dp,
+                                                            ).clickable{
+                                                                vM.filterVideo(video.author.username)
+                                                                navController.navigate("ProfilePage/${video.author.username}")
+                                                            }
+                                                    )
+                                                    AsyncImage(
+                                                        model = video.author.dpURL,
+                                                        modifier = Modifier
+                                                            .size(39.dp)
+                                                            .clip(CircleShape),
+                                                        placeholder = painterResource(id = R.drawable.user_icon),
+                                                        error = painterResource(id = R.drawable.user_icon),
+                                                        contentDescription = "User Dp",
+                                                    )
+                                                }
+                                            }
+                                            Spacer(modifier = Modifier.width(10.dp))
+                                            Text(
+                                                text = video.author.username,
+                                                fontFamily = rosarioFamily,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.secondary,
+                                                fontSize = 17.sp
+                                            )
+                                        }
+                                    }
+                                    Row(
+                                        modifier = Modifier
+                                            .height(60.dp)
+                                            .fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Start
+                                    ) {
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxHeight(0.6F)
+                                                .weight(1F),
+                                            verticalArrangement = Arrangement.Center,
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            VideoViewButton(
+                                                image = if (vM.likedVideoList.value.contains(video.id)) R.drawable.filled_like_icon else R.drawable.like_icon,
+                                                text = "${video.likes}",
+                                                onclick = {
+                                                    val data = JSONObject()
+                                                    data.put("user_id", vM.userName.value)
+                                                    data.put("video_id", video.id)
+                                                    if (vM.likedVideoList.value.contains(video.id)) {
+                                                        vM.mSocket.emit("unlike", data)
+                                                        vM.unlikeVideo(video.id)
+                                                    } else {
+                                                        vM.mSocket.emit("like", data)
+                                                        vM.likeVideo(video.id)
+                                                    }
+                                                }
+                                            )
+                                        }
+
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxHeight(0.6F)
+                                                .weight(1F),
+                                            verticalArrangement = Arrangement.Center,
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            VideoViewButton(
+                                                image = -1,
+                                                text = if (vM.followingList.value.contains(video.author)) "Unsubscribe" else "Subscribe",
+                                                onclick = {
+                                                    val data = JSONObject()
+                                                    data.put("follower_id", vM.userName.value)
+                                                    data.put("following_id", video.author.username)
+                                                    if (vM.followingList.value.contains(video.author)) {
+                                                        vM.mSocket.emit("unfollow", data)
+                                                        vM.removeFollowing(video.author)
+                                                    } else {
+                                                        vM.mSocket.emit("follow", data)
+                                                        vM.addFollowing(video.author)
+                                                    }
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+                                Spacer(modifier = Modifier.width(20.dp))
+                            }
+                        }
+                        item{
+                            Spacer(modifier = Modifier.height(18.dp))
+                        }
+                        item{
+                            Row(
+                                modifier = Modifier.fillMaxWidth().height(2.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ){
+                                Divider(
+                                    modifier = Modifier.fillMaxWidth(0.9F),
+                                    thickness = 1.dp,
+                                    color = MaterialTheme.colorScheme.tertiary
+                                )
+                            }
+                        }
+                        item{
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
                         items(vM.videoList.size) {
                             if (vM.videoList[it].id != video.id) {
                                 VideoPreview(
@@ -556,11 +562,11 @@ fun VideoView(
                 }
 
                 "Quality" -> {
-                    QualitySettingOptions()
+                    QualitySettingOptions(vM , video)
                 }
 
                 else -> {
-                    SpeedSettingOptions()
+                    SpeedSettingOptions(vM)
                 }
             }
         }
@@ -568,7 +574,7 @@ fun VideoView(
 }
 
 @Composable
-fun SpeedSettingOptions() {
+fun SpeedSettingOptions(vM:MyViewModel) {
     LazyColumn(
         modifier = Modifier
             .height(200.dp)
@@ -589,8 +595,11 @@ fun SpeedSettingOptions() {
         item {
             SettingOption(
                 text = "0.25x",
-                isSelected = true,
-                onclick = {}
+                isSelected = (vM.speedChoice.value == 0),
+                onclick = {
+                    vM.speedChoice.value = 0
+                    vM.exoPlayer?.setPlaybackSpeed(0.25f)
+                }
             )
         }
         item {
@@ -599,8 +608,11 @@ fun SpeedSettingOptions() {
         item {
             SettingOption(
                 text = "0.5x",
-                isSelected = false,
-                onclick = {}
+                isSelected = (vM.speedChoice.value == 1),
+                onclick = {
+                    vM.speedChoice.value = 1
+                    vM.exoPlayer?.setPlaybackSpeed(0.5f)
+                }
             )
         }
         item {
@@ -609,8 +621,11 @@ fun SpeedSettingOptions() {
         item {
             SettingOption(
                 text = "0.75x",
-                isSelected = false,
-                onclick = {}
+                isSelected = (vM.speedChoice.value == 2),
+                onclick = {
+                    vM.speedChoice.value = 2
+                    vM.exoPlayer?.setPlaybackSpeed(0.75f)
+                }
             )
         }
         item {
@@ -619,8 +634,11 @@ fun SpeedSettingOptions() {
         item {
             SettingOption(
                 text = "Normal",
-                isSelected = false,
-                onclick = {}
+                isSelected = (vM.speedChoice.value == 3),
+                onclick = {
+                    vM.speedChoice.value = 3
+                    vM.exoPlayer?.setPlaybackSpeed(1f)
+                }
             )
         }
         item {
@@ -629,8 +647,11 @@ fun SpeedSettingOptions() {
         item {
             SettingOption(
                 text = "1.25x",
-                isSelected = false,
-                onclick = {}
+                isSelected = (vM.speedChoice.value == 4),
+                onclick = {
+                    vM.speedChoice.value = 4
+                    vM.exoPlayer?.setPlaybackSpeed(1.25f)
+                }
             )
         }
         item {
@@ -639,8 +660,11 @@ fun SpeedSettingOptions() {
         item {
             SettingOption(
                 text = "1.5x",
-                isSelected = false,
-                onclick = {}
+                isSelected = (vM.speedChoice.value == 5),
+                onclick = {
+                    vM.speedChoice.value = 5
+                    vM.exoPlayer?.setPlaybackSpeed(1.5f)
+                }
             )
         }
         item {
@@ -649,8 +673,11 @@ fun SpeedSettingOptions() {
         item {
             SettingOption(
                 text = "1.75x",
-                isSelected = false,
-                onclick = {}
+                isSelected = (vM.speedChoice.value == 6),
+                onclick = {
+                    vM.speedChoice.value = 6
+                    vM.exoPlayer?.setPlaybackSpeed(1.75f)
+                }
             )
         }
         item {
@@ -658,9 +685,12 @@ fun SpeedSettingOptions() {
         }
         item {
             SettingOption(
-                text = "2x",
-                isSelected = false,
-                onclick = {}
+                text = "2.0x",
+                isSelected = (vM.speedChoice.value == 7),
+                onclick = {
+                    vM.speedChoice.value = 7
+                    vM.exoPlayer?.setPlaybackSpeed(2f)
+                }
             )
         }
         item {
@@ -670,7 +700,7 @@ fun SpeedSettingOptions() {
 }
 
 @Composable
-fun QualitySettingOptions() {
+fun QualitySettingOptions(vM:MyViewModel , video:VideoDetail) {
     LazyColumn(
         modifier = Modifier
             .height(200.dp)
@@ -691,8 +721,20 @@ fun QualitySettingOptions() {
         item {
             SettingOption(
                 text = "Auto",
-                isSelected = true,
-                onclick = {}
+                isSelected = (vM.qualityChoice.intValue==0),
+                onclick = {
+                    vM.qualityChoice.intValue = 0
+                    vM.currentVideoURL.value = "${video.videoURL1}manifest.m3u8"
+                    vM.exoPlayer?.apply {
+                        setMediaItem(
+                            MediaItem.fromUri(
+                                "${video.videoURL1}manifest.m3u8"
+                            )
+                        )
+                        playWhenReady = vM.isPlaying.value
+                    }
+//                    vM.exoPlayer?.seekTo(vM.currentPosition.longValue)
+                }
             )
         }
         item {
@@ -700,9 +742,21 @@ fun QualitySettingOptions() {
         }
         item {
             SettingOption(
-                text = "360P",
-                isSelected = false,
-                onclick = {}
+                text = "480p",
+                isSelected = (vM.qualityChoice.intValue==1),
+                onclick = {
+                    vM.qualityChoice.intValue = 1
+                    vM.currentVideoURL.value = "${video.videoURL1}q1.mp4"
+                    vM.exoPlayer?.apply {
+                        setMediaItem(
+                            MediaItem.fromUri(
+                                "${video.videoURL1}q1.mp4"
+                            )
+                        )
+                        playWhenReady = vM.isPlaying.value
+                    }
+//                    vM.exoPlayer?.seekTo(vM.currentPosition.longValue)
+                }
             )
         }
         item {
@@ -710,9 +764,21 @@ fun QualitySettingOptions() {
         }
         item {
             SettingOption(
-                text = "480P",
-                isSelected = false,
-                onclick = {}
+                text = "720p",
+                isSelected = (vM.qualityChoice.intValue==2),
+                onclick = {
+                    vM.qualityChoice.intValue = 2
+                    vM.currentVideoURL.value = "${video.videoURL1}q2.mp4"
+                    vM.exoPlayer?.apply {
+                        setMediaItem(
+                            MediaItem.fromUri(
+                                "${video.videoURL1}q2.mp4"
+                            )
+                        )
+                        playWhenReady = vM.isPlaying.value
+                    }
+//                    vM.exoPlayer?.seekTo(vM.currentPosition.longValue)
+                }
             )
         }
         item {
@@ -720,24 +786,26 @@ fun QualitySettingOptions() {
         }
         item {
             SettingOption(
-                text = "720P",
-                isSelected = false,
-                onclick = {}
+                text = "1080p",
+                isSelected = (vM.qualityChoice.intValue==3),
+                onclick = {
+                    vM.qualityChoice.intValue = 3
+                    vM.exoPlayer?.apply {
+                        setMediaItem(
+                            MediaItem.fromUri(
+                                "${video.videoURL1}q3.mp4"
+                            )
+                        )
+                        playWhenReady = vM.isPlaying.value
+                    }
+//                    vM.exoPlayer?.seekTo(vM.currentPosition.longValue)
+                }
             )
         }
         item {
             Spacer(modifier = Modifier.height(10.dp))
         }
-        item {
-            SettingOption(
-                text = "1080P",
-                isSelected = false,
-                onclick = {}
-            )
-        }
-        item {
-            Spacer(modifier = Modifier.height(20.dp))
-        }
+
     }
 }
 
@@ -840,36 +908,36 @@ fun VideoViewButton(
     text: String,
     onclick: () -> Unit
 ) {
-        Row(
-            modifier = Modifier
-                .fillMaxHeight(0.95F)
-                .fillMaxWidth(0.9F)
-                .clickable { onclick() }
-                .background(MaterialTheme.colorScheme.secondary)
-                .clip(shape = RoundedCornerShape(4.dp)),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            if (image != -1) {
-                Icon(
-                    modifier = Modifier
-                        .height(20.dp)
-                        .aspectRatio(1F),
-                    painter = painterResource(image),
-                    contentDescription = "",
-                    tint = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.width(5.dp))
-            }
-            Text(
-                textAlign = TextAlign.Center,
-                text = text,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Normal,
-                fontFamily = rosarioFamily,
-                color = MaterialTheme.colorScheme.primary
+    Row(
+        modifier = Modifier
+            .fillMaxHeight(0.95F)
+            .fillMaxWidth(0.9F)
+            .clickable { onclick() }
+            .background(MaterialTheme.colorScheme.secondary)
+            .clip(shape = RoundedCornerShape(4.dp)),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        if (image != -1) {
+            Icon(
+                modifier = Modifier
+                    .height(20.dp)
+                    .aspectRatio(1F),
+                painter = painterResource(image),
+                contentDescription = "",
+                tint = MaterialTheme.colorScheme.primary
             )
+            Spacer(modifier = Modifier.width(5.dp))
         }
+        Text(
+            textAlign = TextAlign.Center,
+            text = text,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Normal,
+            fontFamily = rosarioFamily,
+            color = MaterialTheme.colorScheme.primary
+        )
+    }
 
 }
 
@@ -878,7 +946,7 @@ fun VideoViewButton(
 @Composable
 fun VideoControls(
     exoPlayer: ExoPlayer,
-    vM: ViewModel,
+    vM: MyViewModel,
     run: () -> Unit,
     configuration: Configuration,
     settingControl: MutableState<Boolean>,
@@ -1057,11 +1125,10 @@ fun VideoControls(
                     run = {
                         if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                             activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-                            activity.requestedOrientation =
-                                ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
                         } else {
-                            activity.requestedOrientation =
-                                ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+//                            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
                         }
                     },
                     sz = if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {

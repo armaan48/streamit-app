@@ -14,10 +14,10 @@ fun signup(
     username: String,
     password: String,
     navController: NavController,
-    mainActivity: MainActivity,
-    vM: ViewModel
+    vM: MyViewModel,
+    onSuccess: ()->Unit
 ) {
-    val context = mainActivity.applicationContext
+
     val keyPairGenerator = KeyPairGenerator.getInstance("RSA")
     keyPairGenerator.initialize(3072)
     val keyPair = keyPairGenerator.generateKeyPair()
@@ -49,11 +49,7 @@ fun signup(
     mSocket.on("passSignup") { _ ->
         println("login-signup-process passed")
         vM.errorType.value = ""
-        vM.saveUserCredentials(context, username, password)
-        mainActivity.runOnUiThread {
-            navController.navigate("ProfileCreation")
-            Log.d("debug", "${vM.userName.value} ${vM.password.value}")
-        }
+        onSuccess()
     }
 
     mSocket.on("failSignUp") { args ->
@@ -66,14 +62,15 @@ fun signup(
 
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun login(
+fun login (
     username: String,
     password: String,
     navController: NavController,
+    vM: MyViewModel,
     mainActivity: MainActivity,
-    vM: ViewModel
+    onSuccess: () -> Unit
 ) {
-    val context = mainActivity.applicationContext
+
     val mSocket = SocketHandler.getSocket()
     val data = JSONObject()
     data.put("username", username)
@@ -110,16 +107,12 @@ fun login(
                 println("passed $decryptedPassword")
                 vM.errorType.value = ""
 
-                vM.saveUserCredentials(context, username, password)
-
                 // this line is the problem
-                mainActivity.runOnUiThread {
-                    vM.mSocket.emit("give-liked-video-list", vM.userName.value)
-                    vM.mSocket.emit("give-following-list", vM.userName.value)
-                    vM.mSocket.emit("give-video-list", "nothing")
-                    vM.mSocket.emit("give-following-video-list", vM.userName.value)
-                    navController.navigate("Main")
-                }
+                vM.mSocket.emit("give-liked-video-list", vM.userName.value)
+                vM.mSocket.emit("give-following-list", vM.userName.value)
+                vM.mSocket.emit("give-video-list", "nothing")
+                vM.mSocket.emit("give-following-video-list", vM.userName.value)
+                mainActivity.runOnUiThread(onSuccess)
             } else {
                 vM.errorType.value = "IncorrectInfo"
                 println("login-signup-process ${vM.errorType.value}")
@@ -131,4 +124,5 @@ fun login(
 
         }
     }
+
 }

@@ -51,7 +51,7 @@ android {
 }
 
 dependencies {
-    implementation("androidx.datastore:datastore-preferences:1.0.0-alpha06")
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
 
     val navVersion = "2.7.6"
     // Java language implementation
@@ -74,7 +74,6 @@ dependencies {
         // excluding org.json which is provided by Android
         exclude (group= "org.json", module= "json")
     }
-
     implementation("androidx.datastore:datastore-preferences-core:1.0.0")
     implementation("androidx.datastore:datastore-preferences-rxjava3:1.0.0")
     implementation("io.coil-kt:coil-compose:2.5.0")

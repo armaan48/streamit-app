@@ -45,7 +45,7 @@ import com.example.streamitv1.ui.theme.rosarioFamily
 
 @Composable
 fun FollowingListView(
-    navController: NavController, mainActivity: MainActivity, vM: ViewModel
+    navController: NavController, vM: MyViewModel
 ) {
     val w = LocalConfiguration.current.screenWidthDp.dp
 
@@ -55,7 +55,7 @@ fun FollowingListView(
         label = ""
     )
 
-    SideOptions(navController, mainActivity, vM)
+    SideOptions(navController, vM)
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -158,7 +158,7 @@ fun FollowerList(
 
 @Composable
 fun MainFollow(
-    navController: NavController, mainActivity: MainActivity, vM: ViewModel
+    navController: NavController, vM: MyViewModel
 ) {
     val w = LocalConfiguration.current.screenWidthDp.dp
 
@@ -168,7 +168,7 @@ fun MainFollow(
         label = ""
     )
 
-    SideOptions(navController, mainActivity, vM)
+    SideOptions(navController, vM)
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -256,7 +256,7 @@ fun MainFollow(
 
 @Composable
 fun FollowList(
-    vM: ViewModel
+    vM: MyViewModel
 ) {
     LazyRow(
         modifier = Modifier.fillMaxSize(),

@@ -15,15 +15,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Divider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,21 +37,27 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.streamitv1.ui.theme.rosarioFamily
+import org.json.JSONObject
 
 @Composable
 fun ProfilePage(
-    navController: NavController, mainActivity: MainActivity, vM: ViewModel
+    navController: NavController, vM: MyViewModel, user:UserDetail
 ) {
     val w = LocalConfiguration.current.screenWidthDp.dp
 
+
+    LaunchedEffect(true){
+        vM.mSocket.emit("give-user-data" , user.username)
+    }
     val offsetX by animateDpAsState(
         targetValue = if (!vM.isOffsetEnabled.value) (5 * w) / 8 else 0.dp,
         animationSpec = tween(250, easing = LinearEasing),
         label = ""
     )
 
-    SideOptions(navController, mainActivity, vM)
+    SideOptions(navController, vM)
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -108,14 +115,14 @@ fun ProfilePage(
                                     spread = 1.dp,
                                 )
                         )
-                        Icon(
+                        AsyncImage(
+                            model = "https://storage.googleapis.com/user-streamit/${user.username}.png",
                             modifier = Modifier
-                                .height(55.dp)
-                                .width(55.dp)
+                                .size(55.dp)
                                 .clip(CircleShape),
-                            painter = painterResource(R.drawable.joji_pp),
-                            contentDescription = "back_arrow_icon_light",
-                            tint = Color.Unspecified
+                            placeholder = painterResource(id = R.drawable.user_icon),
+                            error = painterResource(id = R.drawable.user_icon),
+                            contentDescription = "User Dp",
                         )
                     }
                 }
@@ -136,7 +143,7 @@ fun ProfilePage(
                         horizontalAlignment = Alignment.Start
                     ) {
                         Text(
-                            text = "Joji",
+                            text = user.username,
                             fontFamily = rosarioFamily,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.secondary
@@ -150,7 +157,7 @@ fun ProfilePage(
                         horizontalAlignment = Alignment.Start
                     ) {
                         Text(
-                            text = "35k subscribers",
+                            text = if (vM.subscriberCount.containsKey(user.username) ) "${vM.subscriberCount[user.username]} subscribers" else "0 subscribers",
                             fontFamily = rosarioFamily,
                             fontWeight = FontWeight.Light,
                             fontSize = 14.sp,
@@ -158,13 +165,25 @@ fun ProfilePage(
                         )
                     }
                 }
-                LoginNSignupButton(
-                    text = "Subscribers", onclick = {
-
-                    }, modifier = Modifier
-                        .fillMaxHeight(0.5F)
-                        .width(110.dp)
-                )
+                if (vM.userName.value!=user.username){
+                    LoginNSignupButton(
+                        text = if (vM.followingList.value.contains(user)) "Unsubscribe" else "Subscribe",
+                        onclick = {
+                            val data = JSONObject()
+                            data.put("follower_id", vM.userName.value)
+                            data.put("following_id", user.username)
+                            if (vM.followingList.value.contains(user)) {
+                                vM.mSocket.emit("unfollow", data)
+                                vM.removeFollowing(user)
+                            } else {
+                                vM.mSocket.emit("follow", data)
+                                vM.addFollowing(user)
+                            }
+                        }, modifier = Modifier
+                            .fillMaxHeight(0.5F)
+                            .width(110.dp)
+                    )
+                }
                 Spacer(modifier = Modifier.width(25.dp))
             }
             Divider(
@@ -181,11 +200,11 @@ fun ProfilePage(
                 horizontalArrangement = Arrangement.Center,
                 columns = GridCells.Adaptive(minSize = 370.dp)
             ) {
-                items(vM.videoList.size) {
+                items(vM.profileVideoList.size) {
                     VideoPreview(
                         navController = navController,
                         vM = vM,
-                        vM.videoList[it],
+                        vM.profileVideoList[it],
                     )
                 }
             }

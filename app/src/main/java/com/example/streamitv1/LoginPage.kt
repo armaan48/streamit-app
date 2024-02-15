@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -26,9 +27,10 @@ import androidx.navigation.NavController
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun LoginPage(
-    navController: NavController, mainActivity: MainActivity, vM: ViewModel
+    navController: NavController, vM: MyViewModel,mainActivity:MainActivity, onSuccess:()->Unit
 ) {
 
+    val scope= rememberCoroutineScope()
 
     Column(
         modifier = Modifier
@@ -117,7 +119,7 @@ fun LoginPage(
                 .fillMaxWidth(0.78F),
                 text = "Log in",
                 onclick = {
-                    login(vM.userName.value, vM.password.value, navController, mainActivity, vM)
+                    login(vM.userName.value, vM.password.value, navController, vM, mainActivity ,onSuccess)
                 })
         }
         Row(
