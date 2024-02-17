@@ -40,6 +40,8 @@ class MyViewModel : ViewModel() {
     private val _liveServer = mutableStateOf("")
     private val _livePassword = mutableStateOf("")
     private val _subscriberCount = mutableStateMapOf<String , Long>()
+    private val _channelNameMap = mutableStateMapOf<String , String>()
+
     private val _qualityChoice = mutableIntStateOf(0)
     private val _speedChoice = mutableIntStateOf(0)
     private val _currentVideoURL = mutableStateOf("")
@@ -95,6 +97,8 @@ class MyViewModel : ViewModel() {
     val videoChunkList = mutableStateListOf<String>()
 
     val subscriberCount : MutableMap<String , Long> = _subscriberCount
+    val channelNameMap : MutableMap<String , String> = _channelNameMap
+
 
     val qualityChoice : MutableIntState = _qualityChoice
     val speedChoice : MutableIntState = _speedChoice
@@ -512,6 +516,7 @@ class MyViewModel : ViewModel() {
     private val userDataHandler: (Array<Any>) -> Unit = {
         val data = it[0] as JSONObject
         subscriberCount[data.getString("username")] = data.getLong("follower_count")
+        channelNameMap[data.getString("username")] = data.getString("channelDescription")
     }
 
 

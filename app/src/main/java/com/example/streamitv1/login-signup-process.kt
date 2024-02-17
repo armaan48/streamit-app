@@ -15,6 +15,7 @@ fun signup(
     password: String,
     navController: NavController,
     vM: MyViewModel,
+    mainActivity: MainActivity,
     onSuccess: ()->Unit
 ) {
 
@@ -49,7 +50,8 @@ fun signup(
     mSocket.on("passSignup") { _ ->
         println("login-signup-process passed")
         vM.errorType.value = ""
-        onSuccess()
+        vM.mSocket.emit("give-video-list", "nothing")
+        mainActivity.runOnUiThread(onSuccess)
     }
 
     mSocket.on("failSignUp") { args ->

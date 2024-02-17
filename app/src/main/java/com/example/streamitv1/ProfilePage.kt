@@ -73,7 +73,12 @@ fun ProfilePage(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             TopBar(
-                text = "Username", vM = vM
+                text = if (vM.channelNameMap.containsKey(user.username)) {
+                    vM.channelNameMap[user.username] as String
+                } else {
+                    "Channel Name"
+                },
+                vM = vM
 
             )
             Divider(

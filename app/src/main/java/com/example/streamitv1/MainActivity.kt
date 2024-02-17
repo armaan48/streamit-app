@@ -124,7 +124,8 @@ class MainActivity : ComponentActivity() {
                     ) {
                         SignupPage(
                             navController = (navController as NavController),
-                            vM = vM
+                            vM = vM,
+                            mainActivity = this@MainActivity
                         ) {
 
                             navController.navigate("ProfileCreation")

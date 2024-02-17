@@ -170,7 +170,8 @@ fun VideoView(
                 DisposableEffect(key1 = Unit) {
                     onDispose {
                         println("release test")
-                        vM.exoPlayer?.release()
+                        vM.isPlaying.value = false
+                        vM.exoPlayer?.pause()
                     }
                 }
                 AndroidView(
@@ -240,7 +241,8 @@ fun VideoView(
                         DisposableEffect(key1 = Unit) {
                             onDispose {
                                 println("release test")
-                                vM.exoPlayer?.release()
+                                vM.isPlaying.value = false
+                                vM.exoPlayer?.pause()
                             }
                         }
                         AndroidView(
@@ -333,7 +335,7 @@ fun VideoView(
                                                         vM.descriptionExtended.value =
                                                             !vM.descriptionExtended.value
                                                     },
-                                                text = "...more",
+                                                text = if (vM.descriptionExtended.value) "show less" else "show more",
                                                 fontFamily = rosarioFamily,
                                                 fontWeight = FontWeight.SemiBold,
                                                 color = MaterialTheme.colorScheme.secondary,
@@ -472,30 +474,35 @@ fun VideoView(
                                                 }
                                             )
                                         }
+                                        if (video.author.username != vM.userName.value) {
 
-                                        Column(
-                                            modifier = Modifier
-                                                .fillMaxHeight(0.6F)
-                                                .weight(1F),
-                                            verticalArrangement = Arrangement.Center,
-                                            horizontalAlignment = Alignment.CenterHorizontally
-                                        ) {
-                                            VideoViewButton(
-                                                image = -1,
-                                                text = if (vM.followingList.value.contains(video.author)) "Unsubscribe" else "Subscribe",
-                                                onclick = {
-                                                    val data = JSONObject()
-                                                    data.put("follower_id", vM.userName.value)
-                                                    data.put("following_id", video.author.username)
-                                                    if (vM.followingList.value.contains(video.author)) {
-                                                        vM.mSocket.emit("unfollow", data)
-                                                        vM.removeFollowing(video.author)
-                                                    } else {
-                                                        vM.mSocket.emit("follow", data)
-                                                        vM.addFollowing(video.author)
+                                            Column(
+                                                modifier = Modifier
+                                                    .fillMaxHeight(0.6F)
+                                                    .weight(1F),
+                                                verticalArrangement = Arrangement.Center,
+                                                horizontalAlignment = Alignment.CenterHorizontally
+                                            ) {
+                                                VideoViewButton(
+                                                    image = -1,
+                                                    text = if (vM.followingList.value.contains(video.author)) "Unsubscribe" else "Subscribe",
+                                                    onclick = {
+                                                        val data = JSONObject()
+                                                        data.put("follower_id", vM.userName.value)
+                                                        data.put(
+                                                            "following_id",
+                                                            video.author.username
+                                                        )
+                                                        if (vM.followingList.value.contains(video.author)) {
+                                                            vM.mSocket.emit("unfollow", data)
+                                                            vM.removeFollowing(video.author)
+                                                        } else {
+                                                            vM.mSocket.emit("follow", data)
+                                                            vM.addFollowing(video.author)
+                                                        }
                                                     }
-                                                }
-                                            )
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -1045,11 +1052,11 @@ fun VideoControls(
                         R.drawable.play_icon
                     },
                     run = {
-                        if (exoPlayer.isPlaying) {
-                            vM.isPlaying.value = !vM.isPlaying.value
+                        if (vM.isPlaying.value == true) {
+                            vM.isPlaying.value = false
                             exoPlayer.pause()
                         } else {
-                            vM.isPlaying.value = !vM.isPlaying.value
+                            vM.isPlaying.value = true
                             exoPlayer.play()
                         }
                     },

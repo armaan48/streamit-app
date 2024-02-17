@@ -106,7 +106,7 @@ fun VideoPreview(
                         )
                         .background(MaterialTheme.colorScheme.primary)
                         .clickable {
-                            vM.exoPlayer?.release()
+                            vM.exoPlayer?.pause()
                             Log.d("armaan op" ,"VideoPlayer/${video.str}" )
                             vM.currentPosition.longValue = 0
                             vM.currentVideoURL.value = video.videoURL2
